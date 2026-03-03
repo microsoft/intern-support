@@ -2,15 +2,15 @@
 
 ## Project Overview
 
-This project establishes a centralized platform enabling Solution Engineering (SE) Interns to easily locate and shadow technical meetings. It accomplishes this by parsing unstructured email inputs sent to a "shadow inbox" by Full-Time Employees (FTEs), structuring the extracted data into explicit JSON objects using AI via Logic Apps, and storing the entries in Azure CosmosDB. A React-based frontend polls the backing server to present the collected schedule to end users.
+This project establishes a centralized platform enabling interns in Belgium to easily locate and shadow (technical) meetings. It accomplishes this by parsing unstructured email inputs sent to a "shadow inbox" by Full-Time Employees (FTEs), structuring the extracted data into explicit JSON objects using AI via Logic Apps, and storing the entries in Azure CosmosDB. A React-based frontend polls the backing server to present the collected schedule to end users.
 
 ## Why This Exists
 
-As a Solutions Engineering intern, shadowing customer-facing meetings is one of the most effective ways to learn. But finding those meetings is painful:
+As an intern, shadowing customer-facing meetings is one of the most effective ways to learn. But finding those meetings is painful:
 
-- **Manual outreach is inefficient.** Interns have to individually message full-time Solution Engineers asking if they have any upcoming meetings available to shadow. This is a lot of work for a "maybe".
+- **Manual outreach is inefficient.** Interns have to individually message FTEs asking if they have any upcoming meetings available to shadow. This is a lot of work for a "maybe".
 - **FTEs forget.** Even when an FTE agrees, they may forget to loop the intern in when the meeting actually happens.
-- **Some FTEs are too new themselves.** Not every SE is in a position to bring interns into their calls, making cold outreach a gamble.
+- **Some FTEs are too new themselves.** Not every FTE is in a position to bring interns into their calls, making cold outreach a gamble.
 - **Some meetings simply cannot be shadowed.** Some meetings might be sensitive or the customer might prefer to not have interns shadow the meeting.
 
 The core problem: there was no central place where interns could browse meetings that are explicitly available for shadowing.
@@ -41,7 +41,7 @@ FTE forwards meeting invite --> Shadow Inbox --> AI extracts details --> Cosmos 
 | **Backend Storage**    | Azure Cosmos DB (serverless)              |
 | **Frontend**           | React with TypeScript (Vite)              |
 | **State/Data Polling** | TanStack Query `useQuery()`               |
-| **API Route Setup**    | Bun Server                                |
+| **API Route Setup**    | Express Server                            |
 
 ## Application Flow
 
