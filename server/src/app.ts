@@ -1,6 +1,8 @@
 // express app config
 import express from "express";
 import { errorHandler } from "./middlewares/errorHandler";
+import { authMiddleware } from "./middlewares/authMiddleware";
+import authRoutes from "./routes/authRoutes";
 import itemRoutes from "./routes/itemRoutes";
 
 const app = express();
@@ -12,8 +14,11 @@ app.get("/", (_req, res) => {
   res.json({ status: "ok", message: "Shadow Me Interns API" });
 });
 
-// Routes
-app.use("/api/items", itemRoutes);
+// Auth routes (public — no JWT required)
+app.use("/api/auth", authRoutes);
+
+// Protected routes (JWT required)
+app.use("/api/items", authMiddleware, itemRoutes);
 
 // Global error handler (should be after routes)
 app.use(errorHandler);
