@@ -1,4 +1,5 @@
 import {
+  Caption1,
   makeStyles,
   MessageBar,
   MessageBarBody,
@@ -27,6 +28,7 @@ const useStyles = makeStyles({
     maxWidth: "960px",
     margin: "0 auto",
     padding: tokens.spacingHorizontalXL,
+    paddingBottom: "48px",
   },
   title: {
     marginBottom: tokens.spacingVerticalL,
@@ -40,6 +42,18 @@ const useStyles = makeStyles({
     display: "flex",
     justifyContent: "center",
     padding: tokens.spacingVerticalXXXL,
+  },
+  footer: {
+    position: "fixed" as const,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    textAlign: "center" as const,
+    padding: `${tokens.spacingVerticalS} 0`,
+    backgroundColor: tokens.colorNeutralBackground1,
+    borderTop: `1px solid ${tokens.colorNeutralStroke2}`,
+    color: tokens.colorNeutralForeground4,
+    zIndex: 50,
   },
 });
 
@@ -207,6 +221,12 @@ export function MeetingList() {
         }}
         onError={handleJoinError}
       />
+
+      <div className={styles.footer}>
+        <Caption1>
+          For interns, by an intern — Aryan Shah (& Github Copilot)
+        </Caption1>
+      </div>
     </div>
   );
 }
