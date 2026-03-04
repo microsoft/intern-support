@@ -14,11 +14,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useMeetings } from "../hooks/useMeetings";
-import {
-  deleteMeeting as deleteMeetingApi,
-  leaveMeeting as leaveMeetingApi,
-} from "../utils/api";
+import { leaveMeeting as leaveMeetingApi } from "../utils/api";
 import type { Meeting } from "../utils/types";
+import { DeleteDialog } from "./DeleteDialog";
 import { EmptyState } from "./EmptyState";
 import { FilterBar, useFilteredMeetings } from "./FilterBar";
 import { JoinDialog } from "./JoinDialog";
@@ -70,6 +68,7 @@ export function MeetingList() {
   } = useFilteredMeetings(meetings, email ?? "");
 
   const [joinTarget, setJoinTarget] = useState<Meeting | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Meeting | null>(null);
 
   const leaveMutation = useMutation({
     mutationFn: (id: string) => leaveMeetingApi(id),
@@ -87,29 +86,6 @@ export function MeetingList() {
         <Toast>
           <ToastTitle>
             {err instanceof Error ? err.message : "Failed to leave meeting"}
-          </ToastTitle>
-        </Toast>,
-        { intent: "error" },
-      );
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => deleteMeetingApi(id),
-    onSuccess: () => {
-      dispatchToast(
-        <Toast>
-          <ToastTitle>Meeting deleted</ToastTitle>
-        </Toast>,
-        { intent: "success" },
-      );
-      queryClient.invalidateQueries({ queryKey: ["meetings"] });
-    },
-    onError: (err) => {
-      dispatchToast(
-        <Toast>
-          <ToastTitle>
-            {err instanceof Error ? err.message : "Failed to delete meeting"}
           </ToastTitle>
         </Toast>,
         { intent: "error" },
@@ -198,7 +174,7 @@ export function MeetingList() {
                   userEmail={email ?? ""}
                   onJoin={setJoinTarget}
                   onLeave={(mt) => leaveMutation.mutate(mt.id)}
-                  onDelete={(mt) => deleteMutation.mutate(mt.id)}
+                  onDelete={setDeleteTarget}
                 />
               ))}
             </div>
@@ -210,6 +186,21 @@ export function MeetingList() {
         meeting={joinTarget}
         onClose={() => setJoinTarget(null)}
         onJoined={handleJoined}
+        onError={handleJoinError}
+      />
+
+      <DeleteDialog
+        meeting={deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onDeleted={() => {
+          dispatchToast(
+            <Toast>
+              <ToastTitle>Meeting deleted</ToastTitle>
+            </Toast>,
+            { intent: "success" },
+          );
+          queryClient.invalidateQueries({ queryKey: ["meetings"] });
+        }}
         onError={handleJoinError}
       />
     </div>

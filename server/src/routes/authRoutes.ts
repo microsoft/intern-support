@@ -3,6 +3,7 @@ import { isWhitelisted } from "../utils/whitelist";
 import { createVerificationCode, validateVerificationCode } from "../utils/cosmos";
 import { sendVerificationEmail } from "../utils/email";
 import { signToken, verifyToken } from "../utils/jwt";
+import config from "../config/config";
 
 const router = Router();
 
@@ -26,6 +27,13 @@ router.post("/request-code", async (req: Request, res: Response) => {
 
     if (!isWhitelisted(normalizedEmail)) {
       res.status(403).json({ message: "Email is not authorized to access this platform" });
+      return;
+    }
+
+    // Test account bypasses code generation & email sending
+    if (config.testBypassEmail && normalizedEmail === config.testBypassEmail) {
+      const token = signToken(normalizedEmail);
+      res.json({ message: "Verification code sent", token });
       return;
     }
 

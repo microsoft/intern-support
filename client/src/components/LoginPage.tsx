@@ -73,7 +73,12 @@ export function LoginPage() {
     setError(null);
 
     try {
-      await requestCode(email.toLowerCase().trim());
+      const res = await requestCode(email.toLowerCase().trim());
+      // Test bypass: backend returns a token directly, skip code step
+      if (res.token) {
+        login(res.token, email.toLowerCase().trim());
+        return;
+      }
       setStep("code");
     } catch (err) {
       setError(

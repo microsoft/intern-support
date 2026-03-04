@@ -30,7 +30,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 // ── Auth ────────────────────────────────────────────────────────────
 
 export const requestCode = (email: string) =>
-  request<{ message: string }>("/api/auth/request-code", {
+  request<{ message: string; token?: string }>("/api/auth/request-code", {
     method: "POST",
     body: JSON.stringify({ email }),
   });
