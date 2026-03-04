@@ -8,7 +8,7 @@ const client = new CosmosClient({
 });
 
 const database = client.database(config.cosmos.database);
-const container: Container = database.container(config.cosmos.container);
+const container: Container = database.container(config.cosmos.authContainer);
 
 /** How long a verification code stays valid (ms). */
 const CODE_TTL_MS = 60 * 60 * 1000; // 1 hour

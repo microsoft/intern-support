@@ -12,6 +12,7 @@ interface Config {
     key: string;
     database: string;
     container: string;
+    authContainer: string;
   };
   smtp: {
     host: string;
@@ -34,6 +35,7 @@ const config: Config = {
     key: process.env.COSMOS_KEY || "",
     database: process.env.COSMOS_DATABASE || "",
     container: process.env.COSMOS_CONTAINER || "",
+    authContainer: process.env.COSMOS_AUTH_CONTAINER || "auth_codes",
   },
   smtp: {
     host: process.env.SMTP_HOST || "smtp.office365.com",
