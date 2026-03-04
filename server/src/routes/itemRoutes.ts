@@ -1,7 +1,12 @@
 import { Request, Response, Router } from "express";
 import { sendJoinNotification } from "../utils/email";
 import { generateICS } from "../utils/ics";
-import { getAllMeetings, getMeetingById, joinMeeting } from "../utils/meetings";
+import {
+  getAllMeetings,
+  getMeetingById,
+  joinMeeting,
+  leaveMeeting,
+} from "../utils/meetings";
 
 const router = Router();
 
@@ -88,6 +93,25 @@ router.post("/:id/join", async (req: Request, res: Response) => {
   } catch (err: unknown) {
     const error = err as Error & { status?: number };
     console.error("Error joining meeting:", error.message);
+    res.status(error.status || 500).json({ message: error.message });
+  }
+});
+
+/**
+ * POST /api/items/:id/leave
+ * Body: (none — email is taken from JWT)
+ *
+ * Removes the intern's email from joined_interns.
+ */
+router.post("/:id/leave", async (req: Request, res: Response) => {
+  try {
+    const email = (req as Request & { user: { email: string } }).user.email;
+    const updated = await leaveMeeting(req.params.id as string, email);
+
+    res.json(updated);
+  } catch (err: unknown) {
+    const error = err as Error & { status?: number };
+    console.error("Error leaving meeting:", error.message);
     res.status(error.status || 500).json({ message: error.message });
   }
 });

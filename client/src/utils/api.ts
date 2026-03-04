@@ -56,6 +56,9 @@ export const getMeeting = (id: string) => request<Meeting>(`/api/items/${id}`);
 export const joinMeeting = (id: string) =>
   request<Meeting>(`/api/items/${id}/join`, { method: "POST" });
 
+export const leaveMeeting = (id: string) =>
+  request<Meeting>(`/api/items/${id}/leave`, { method: "POST" });
+
 /** Download an .ics file and trigger save-as dialog. */
 export const downloadICS = async (id: string, filename: string) => {
   const token = getToken();

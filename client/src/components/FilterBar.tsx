@@ -38,6 +38,7 @@ export function useFilteredMeetings(meetings: Meeting[], userEmail: string) {
   const [search, setSearch] = useState("");
   const [team, setTeam] = useState(ALL);
   const [sector, setSector] = useState(ALL);
+  const [role, setRole] = useState(ALL);
   const [availability, setAvailability] = useState(ALL);
 
   const teams = useMemo(
@@ -47,6 +48,11 @@ export function useFilteredMeetings(meetings: Meeting[], userEmail: string) {
 
   const sectors = useMemo(
     () => [...new Set(meetings.map((m) => m.sector).filter(Boolean))].sort(),
+    [meetings],
+  );
+
+  const roles = useMemo(
+    () => [...new Set(meetings.map((m) => m.role).filter(Boolean))].sort(),
     [meetings],
   );
 
@@ -72,6 +78,10 @@ export function useFilteredMeetings(meetings: Meeting[], userEmail: string) {
       result = result.filter((m) => m.sector === sector);
     }
 
+    if (role !== ALL) {
+      result = result.filter((m) => m.role === role);
+    }
+
     if (availability === "available") {
       result = result.filter((m) => m.joined_interns.length < m.capacity);
     } else if (availability === "joined") {
@@ -79,7 +89,7 @@ export function useFilteredMeetings(meetings: Meeting[], userEmail: string) {
     }
 
     return result;
-  }, [meetings, search, team, sector, availability, userEmail]);
+  }, [meetings, search, team, sector, role, availability, userEmail]);
 
   return {
     filtered,
@@ -89,10 +99,13 @@ export function useFilteredMeetings(meetings: Meeting[], userEmail: string) {
     setTeam,
     sector,
     setSector,
+    role,
+    setRole,
     availability,
     setAvailability,
     teams,
     sectors,
+    roles,
   };
 }
 
@@ -103,10 +116,13 @@ interface Props {
   onTeamChange: (val: string) => void;
   sector: string;
   onSectorChange: (val: string) => void;
+  role: string;
+  onRoleChange: (val: string) => void;
   availability: string;
   onAvailabilityChange: (val: string) => void;
   teams: string[];
   sectors: string[];
+  roles: string[];
 }
 
 export function FilterBar({
@@ -116,10 +132,13 @@ export function FilterBar({
   onTeamChange,
   sector,
   onSectorChange,
+  role,
+  onRoleChange,
   availability,
   onAvailabilityChange,
   teams,
   sectors,
+  roles,
 }: Props) {
   const styles = useStyles();
 
@@ -161,6 +180,22 @@ export function FilterBar({
           {sectors.map((s) => (
             <Option key={s} value={s}>
               {s}
+            </Option>
+          ))}
+        </Dropdown>
+      )}
+
+      {roles.length > 0 && (
+        <Dropdown
+          className={styles.dropdown}
+          placeholder="All roles"
+          value={role === ALL ? "All roles" : role}
+          onOptionSelect={(_e, data) => onRoleChange(data.optionValue ?? ALL)}
+        >
+          <Option value={ALL}>All roles</Option>
+          {roles.map((r) => (
+            <Option key={r} value={r}>
+              {r}
             </Option>
           ))}
         </Dropdown>

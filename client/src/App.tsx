@@ -5,7 +5,10 @@ import {
   makeStyles,
   webLightTheme,
 } from "@fluentui/react-components";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 import { Header } from "./components/Header";
 import { LoginPage } from "./components/LoginPage";
 import { MeetingList } from "./components/MeetingList";
@@ -13,7 +16,15 @@ import { AuthProvider, useAuth } from "./hooks/useAuth";
 import "./index.css";
 
 const TOASTER_ID = "global";
-const queryClient = new QueryClient();
+
+// Persist QueryClient across HMR reloads to avoid "not a constructor" errors
+const _global = globalThis as typeof globalThis & {
+  __queryClient?: QueryClient;
+};
+if (!_global.__queryClient) {
+  _global.__queryClient = new QueryClient();
+}
+const queryClient = _global.__queryClient;
 
 const useStyles = makeStyles({
   loading: {
@@ -52,10 +63,10 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <FluentProvider theme={webLightTheme}>
-        <Toaster toasterId={TOASTER_ID} position="top" />
         <AuthProvider>
           <AppContent />
         </AuthProvider>
+        <Toaster toasterId={TOASTER_ID} position="top" />
       </FluentProvider>
     </QueryClientProvider>
   );

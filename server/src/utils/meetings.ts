@@ -87,3 +87,31 @@ export const joinMeeting = async (
 
   return resource as MeetingDoc;
 };
+
+/**
+ * Remove an intern from a meeting's joined_interns array.
+ * Throws if the meeting doesn't exist or the intern hasn't joined.
+ */
+export const leaveMeeting = async (
+  id: string,
+  internEmail: string,
+): Promise<MeetingDoc> => {
+  const meeting = await getMeetingById(id);
+  if (!meeting)
+    throw Object.assign(new Error("Meeting not found"), { status: 404 });
+
+  const idx = meeting.joined_interns.indexOf(internEmail);
+  if (idx === -1) {
+    throw Object.assign(new Error("You have not joined this meeting"), {
+      status: 409,
+    });
+  }
+
+  meeting.joined_interns.splice(idx, 1);
+
+  const { resource } = await container
+    .item(meeting.id, meeting.id)
+    .replace(meeting);
+
+  return resource as MeetingDoc;
+};

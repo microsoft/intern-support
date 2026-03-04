@@ -24,12 +24,14 @@ import type { Meeting } from "../utils/types";
 const useStyles = makeStyles({
   card: {
     width: "100%",
+    height: "100%",
   },
   details: {
     display: "flex",
     flexDirection: "column",
     gap: tokens.spacingVerticalXS,
     padding: `${tokens.spacingVerticalS} 0`,
+    flex: 1,
   },
   row: {
     display: "flex",
@@ -63,6 +65,7 @@ interface MeetingCardProps {
   meeting: Meeting;
   userEmail: string;
   onJoin: (meeting: Meeting) => void;
+  onLeave: (meeting: Meeting) => void;
 }
 
 /** Format "2025-03-15" → "Sat, Mar 15, 2025" */
@@ -84,7 +87,12 @@ function formatTime(time: string): string {
   return `${h12}:${String(m).padStart(2, "0")} ${suffix}`;
 }
 
-export function MeetingCard({ meeting, userEmail, onJoin }: MeetingCardProps) {
+export function MeetingCard({
+  meeting,
+  userEmail,
+  onJoin,
+  onLeave,
+}: MeetingCardProps) {
   const styles = useStyles();
 
   const spotsLeft = meeting.capacity - meeting.joined_interns.length;
@@ -203,7 +211,15 @@ export function MeetingCard({ meeting, userEmail, onJoin }: MeetingCardProps) {
             </Button>
           )}
 
-          {!hasJoined && (
+          {hasJoined ? (
+            <Button
+              appearance="subtle"
+              size="small"
+              onClick={() => onLeave(meeting)}
+            >
+              Leave
+            </Button>
+          ) : (
             <Button
               appearance="primary"
               size="small"

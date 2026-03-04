@@ -43,7 +43,7 @@ export function Header() {
 
   return (
     <header className={styles.header}>
-      <span className={styles.logo}>Shadow Me</span>
+      <span className={styles.logo}>Shadow Me Interns</span>
 
       <div className={styles.user}>
         <Caption1>{email}</Caption1>

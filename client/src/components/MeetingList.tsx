@@ -9,10 +9,12 @@ import {
   tokens,
   useToastController,
 } from "@fluentui/react-components";
-import { useQueryClient } from "@tanstack/react-query";
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useMeetings } from "../hooks/useMeetings";
+import { leaveMeeting as leaveMeetingApi } from "../utils/api";
 import type { Meeting } from "../utils/types";
 import { EmptyState } from "./EmptyState";
 import { FilterBar, useFilteredMeetings } from "./FilterBar";
@@ -55,13 +57,39 @@ export function MeetingList() {
     setTeam,
     sector,
     setSector,
+    role,
+    setRole,
     availability,
     setAvailability,
     teams,
     sectors,
+    roles,
   } = useFilteredMeetings(meetings, email ?? "");
 
   const [joinTarget, setJoinTarget] = useState<Meeting | null>(null);
+
+  const leaveMutation = useMutation({
+    mutationFn: (id: string) => leaveMeetingApi(id),
+    onSuccess: () => {
+      dispatchToast(
+        <Toast>
+          <ToastTitle>Left the meeting</ToastTitle>
+        </Toast>,
+        { intent: "success" },
+      );
+      queryClient.invalidateQueries({ queryKey: ["meetings"] });
+    },
+    onError: (err) => {
+      dispatchToast(
+        <Toast>
+          <ToastTitle>
+            {err instanceof Error ? err.message : "Failed to leave meeting"}
+          </ToastTitle>
+        </Toast>,
+        { intent: "error" },
+      );
+    },
+  });
 
   const handleJoined = () => {
     dispatchToast(
@@ -124,10 +152,13 @@ export function MeetingList() {
             onTeamChange={setTeam}
             sector={sector}
             onSectorChange={setSector}
+            role={role}
+            onRoleChange={setRole}
             availability={availability}
             onAvailabilityChange={setAvailability}
             teams={teams}
             sectors={sectors}
+            roles={roles}
           />
 
           {filtered.length === 0 ? (
@@ -140,6 +171,7 @@ export function MeetingList() {
                   meeting={m}
                   userEmail={email ?? ""}
                   onJoin={setJoinTarget}
+                  onLeave={(mt) => leaveMutation.mutate(mt.id)}
                 />
               ))}
             </div>
