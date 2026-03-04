@@ -1,15 +1,7 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import config from "../config/config";
 
-const transporter = nodemailer.createTransport({
-  host: config.smtp.host,
-  port: config.smtp.port,
-  secure: false, // STARTTLS
-  auth: {
-    user: config.smtp.user,
-    pass: config.smtp.pass,
-  },
-});
+const resend = new Resend(config.resendApiKey);
 
 /**
  * Send a one-time verification code to the given email address.
@@ -18,11 +10,10 @@ export const sendVerificationEmail = async (
   to: string,
   code: string,
 ): Promise<void> => {
-  await transporter.sendMail({
-    from: `"Shadow Me Interns" <${config.smtp.user}>`,
-    to,
+  const { error } = await resend.emails.send({
+    from: "Shadow Me Interns <noreply@shadowmeinterns.me>",
+    to: [to],
     subject: "Your Shadow Me verification code",
-    text: `Your verification code is: ${code}\n\nThis code expires in 1 hour.`,
     html: `
       <div style="font-family:Segoe UI,sans-serif;max-width:480px;margin:0 auto;padding:24px">
         <h2 style="color:#0078d4">Shadow Me Interns</h2>
@@ -32,4 +23,8 @@ export const sendVerificationEmail = async (
       </div>
     `,
   });
+
+  if (error) {
+    throw new Error(`Resend email failed: ${error.message}`);
+  }
 };
