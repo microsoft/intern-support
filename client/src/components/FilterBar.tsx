@@ -1,11 +1,17 @@
 import {
+  Button,
   Dropdown,
   Input,
   Option,
+  Tooltip,
   makeStyles,
   tokens,
 } from "@fluentui/react-components";
-import { SearchRegular } from "@fluentui/react-icons";
+import {
+  ArrowSortDownRegular,
+  ArrowSortUpRegular,
+  SearchRegular,
+} from "@fluentui/react-icons";
 import { useMemo, useState } from "react";
 import type { Meeting } from "../utils/types";
 
@@ -40,6 +46,7 @@ export function useFilteredMeetings(meetings: Meeting[], userEmail: string) {
   const [sector, setSector] = useState(ALL);
   const [role, setRole] = useState(ALL);
   const [availability, setAvailability] = useState(ALL);
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
   const teams = useMemo(
     () => [...new Set(meetings.map((m) => m.team).filter(Boolean))].sort(),
@@ -88,8 +95,21 @@ export function useFilteredMeetings(meetings: Meeting[], userEmail: string) {
       result = result.filter((m) => m.joined_interns.includes(userEmail));
     }
 
-    return result;
-  }, [meetings, search, team, sector, role, availability, userEmail]);
+    return [...result].sort((a, b) => {
+      const dateA = new Date(`${a.date}T${a.start_time}`).getTime();
+      const dateB = new Date(`${b.date}T${b.start_time}`).getTime();
+      return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+    });
+  }, [
+    meetings,
+    search,
+    team,
+    sector,
+    role,
+    availability,
+    sortOrder,
+    userEmail,
+  ]);
 
   return {
     filtered,
@@ -103,6 +123,8 @@ export function useFilteredMeetings(meetings: Meeting[], userEmail: string) {
     setRole,
     availability,
     setAvailability,
+    sortOrder,
+    setSortOrder,
     teams,
     sectors,
     roles,
@@ -120,6 +142,8 @@ interface Props {
   onRoleChange: (val: string) => void;
   availability: string;
   onAvailabilityChange: (val: string) => void;
+  sortOrder: string;
+  onSortOrderChange: (val: "newest" | "oldest") => void;
   teams: string[];
   sectors: string[];
   roles: string[];
@@ -136,6 +160,8 @@ export function FilterBar({
   onRoleChange,
   availability,
   onAvailabilityChange,
+  sortOrder,
+  onSortOrderChange,
   teams,
   sectors,
   roles,
@@ -219,6 +245,25 @@ export function FilterBar({
         <Option value="available">Available</Option>
         <Option value="joined">Joined</Option>
       </Dropdown>
+
+      <Tooltip
+        content={sortOrder === "newest" ? "Newest first" : "Oldest first"}
+        relationship="label"
+      >
+        <Button
+          appearance="outline"
+          icon={
+            sortOrder === "newest" ? (
+              <ArrowSortDownRegular />
+            ) : (
+              <ArrowSortUpRegular />
+            )
+          }
+          onClick={() =>
+            onSortOrderChange(sortOrder === "newest" ? "oldest" : "newest")
+          }
+        />
+      </Tooltip>
     </div>
   );
 }

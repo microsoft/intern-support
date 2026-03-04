@@ -62,6 +62,8 @@ export function MeetingList() {
     setRole,
     availability,
     setAvailability,
+    sortOrder,
+    setSortOrder,
     teams,
     sectors,
     roles,
@@ -158,6 +160,8 @@ export function MeetingList() {
             onRoleChange={setRole}
             availability={availability}
             onAvailabilityChange={setAvailability}
+            sortOrder={sortOrder}
+            onSortOrderChange={setSortOrder}
             teams={teams}
             sectors={sectors}
             roles={roles}
