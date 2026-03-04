@@ -153,7 +153,9 @@ export function MeetingCard({
       <div className={styles.details}>
         <div className={styles.row}>
           <PersonRegular fontSize={16} />
-          <Caption1>{meeting.original_sender}</Caption1>
+          <Caption1>
+            <a href={`mailto:${meeting.original_sender}`}>{meeting.original_sender}</a>
+          </Caption1>
         </div>
 
         <div className={styles.row}>
