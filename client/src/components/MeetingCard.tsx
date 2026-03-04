@@ -154,7 +154,9 @@ export function MeetingCard({
         <div className={styles.row}>
           <PersonRegular fontSize={16} />
           <Caption1>
-            <a href={`mailto:${meeting.original_sender}`}>{meeting.original_sender}</a>
+            <a href={`mailto:${meeting.original_sender}`}>
+              {meeting.original_sender}
+            </a>
           </Caption1>
         </div>
 
@@ -166,7 +168,7 @@ export function MeetingCard({
         <div className={styles.row}>
           <ClockRegular fontSize={16} />
           <Caption1>
-            {formatTime(meeting.start_time)} – {formatTime(meeting.end_time)}
+            {formatTime(meeting.start_time)} - {formatTime(meeting.end_time)}
           </Caption1>
         </div>
 
@@ -209,7 +211,7 @@ export function MeetingCard({
         </div>
 
         <div className={styles.actions}>
-          {!isFull && (
+          {(!isFull || hasJoined) && (
             <Button
               appearance="subtle"
               icon={<CalendarAddRegular />}
