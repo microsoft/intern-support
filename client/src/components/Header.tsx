@@ -1,14 +1,14 @@
 import {
-  makeStyles,
-  tokens,
+  Avatar,
   Button,
   Caption1,
+  makeStyles,
   Menu,
-  MenuTrigger,
-  MenuPopover,
-  MenuList,
   MenuItem,
-  Avatar,
+  MenuList,
+  MenuPopover,
+  MenuTrigger,
+  tokens,
 } from "@fluentui/react-components";
 import { SignOutRegular } from "@fluentui/react-icons";
 import { useAuth } from "../hooks/useAuth";

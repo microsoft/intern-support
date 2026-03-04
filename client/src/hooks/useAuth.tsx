@@ -6,8 +6,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { clearAuth, getToken, setEmail, setToken } from "../utils/auth";
 import { validateToken } from "../utils/api";
+import { clearAuth, getToken, setEmail, setToken } from "../utils/auth";
 
 interface AuthState {
   isAuthenticated: boolean;

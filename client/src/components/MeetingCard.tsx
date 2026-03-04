@@ -1,23 +1,23 @@
 import {
-  Card,
-  CardHeader,
-  CardFooter,
-  Body1,
-  Caption1,
   Badge,
+  Body1,
   Button,
+  Caption1,
+  Card,
+  CardFooter,
+  CardHeader,
   makeStyles,
   tokens,
 } from "@fluentui/react-components";
 import {
+  ArrowForwardRegular,
+  CalendarAddRegular,
   CalendarRegular,
+  CheckmarkCircleRegular,
   ClockRegular,
   LocationRegular,
-  PersonRegular,
   PeopleRegular,
-  CalendarAddRegular,
-  CheckmarkCircleRegular,
-  ArrowForwardRegular,
+  PersonRegular,
 } from "@fluentui/react-icons";
 import type { Meeting } from "../utils/types";
 

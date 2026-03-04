@@ -19,7 +19,8 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
     throw new Error(
-      (data as { message?: string }).message || `Request failed (${res.status})`,
+      (data as { message?: string }).message ||
+        `Request failed (${res.status})`,
     );
   }
 
@@ -50,8 +51,7 @@ export const validateToken = (token: string) =>
 
 export const getMeetings = () => request<Meeting[]>("/api/items");
 
-export const getMeeting = (id: string) =>
-  request<Meeting>(`/api/items/${id}`);
+export const getMeeting = (id: string) => request<Meeting>(`/api/items/${id}`);
 
 export const joinMeeting = (id: string) =>
   request<Meeting>(`/api/items/${id}/join`, { method: "POST" });
