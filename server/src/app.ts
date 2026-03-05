@@ -10,7 +10,7 @@ import internRoutes from "./routes/internRoutes";
 
 const app = express();
 
-app.use(cors({ origin: config.clientUrl, credentials: true }));
+app.use(cors({ origin: config.allowedOrigins, credentials: true }));
 app.use(express.json());
 
 // Health check

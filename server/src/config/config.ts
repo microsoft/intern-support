@@ -6,6 +6,7 @@ interface Config {
   port: number;
   nodeEnv: string;
   clientUrl: string;
+  allowedOrigins: string[];
   jwtSecret: string;
   whitelistedEmails: string[];
   cosmos: {
@@ -23,6 +24,10 @@ const config: Config = {
   port: Number(process.env.PORT) || 3000,
   nodeEnv: process.env.NODE_ENV || "development",
   clientUrl: process.env.CLIENT_URL || "http://localhost:5173",
+  allowedOrigins: (process.env.ALLOWED_ORIGINS || process.env.CLIENT_URL || "http://localhost:5173")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean),
   jwtSecret: process.env.JWT_SECRET || "",
   whitelistedEmails: (process.env.WHITELISTED_EMAILS || "")
     .split(",")
