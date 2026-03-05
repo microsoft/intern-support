@@ -18,10 +18,10 @@ import type { Meeting } from "../utils/types";
 const useStyles = makeStyles({
   bar: {
     display: "flex",
-    flexWrap: "wrap",
     gap: tokens.spacingHorizontalM,
     marginBottom: tokens.spacingVerticalL,
     alignItems: "end",
+    overflowX: "auto" as const,
   },
   search: {
     minWidth: "220px",
