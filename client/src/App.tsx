@@ -7,7 +7,8 @@ import {
 } from "@fluentui/react-components";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
-import { Header } from "./components/Header";
+import { Header, type Page } from "./components/Header";
+import { InternList } from "./components/InternList";
 import { LoginPage } from "./components/LoginPage";
 import { MeetingList } from "./components/MeetingList";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
@@ -25,10 +26,12 @@ const useStyles = makeStyles({
 });
 
 function AuthenticatedApp() {
+  const [page, setPage] = useState<Page>("meetings");
+
   return (
     <>
-      <Header />
-      <MeetingList />
+      <Header currentPage={page} onNavigate={setPage} />
+      {page === "meetings" ? <MeetingList /> : <InternList />}
     </>
   );
 }

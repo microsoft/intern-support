@@ -16,3 +16,11 @@ export interface Meeting {
   capacity: number;
   joined_interns: string[];
 }
+
+/** Shape of an intern from the static directory. */
+export interface Intern {
+  name: string;
+  alias: string;
+  role: string;
+  team: string;
+}

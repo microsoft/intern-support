@@ -6,6 +6,7 @@ import {
   Card,
   CardFooter,
   CardHeader,
+  Tooltip,
   makeStyles,
   tokens,
 } from "@fluentui/react-components";
@@ -191,15 +192,40 @@ export function MeetingCard({
 
       <CardFooter className={styles.footer}>
         <div className={styles.badges}>
-          <Badge
-            appearance="tint"
-            color={isFull ? "danger" : "informative"}
-            icon={<PeopleRegular />}
+          <Tooltip
+            content={
+              meeting.joined_interns.length > 0
+                ? {
+                    children: (
+                      <span>
+                        {meeting.joined_interns.map((e, i) => (
+                          <span key={e}>
+                            <a
+                              href={`mailto:${e}`}
+                              style={{ color: "inherit" }}
+                            >
+                              {e}
+                            </a>
+                            {i < meeting.joined_interns.length - 1 && <br />}
+                          </span>
+                        ))}
+                      </span>
+                    ),
+                  }
+                : "No one has joined yet"
+            }
+            relationship="description"
           >
-            {isFull
-              ? "Full"
-              : `${meeting.joined_interns.length}/${meeting.capacity} joined`}
-          </Badge>
+            <Badge
+              appearance="tint"
+              color={isFull ? "danger" : "informative"}
+              icon={<PeopleRegular />}
+            >
+              {isFull
+                ? "Full"
+                : `${meeting.joined_interns.length}/${meeting.capacity} joined`}
+            </Badge>
+          </Tooltip>
 
           {hasJoined && (
             <Badge

@@ -25,10 +25,19 @@ const useStyles = makeStyles({
     top: "0",
     zIndex: 100,
   },
+  left: {
+    display: "flex",
+    alignItems: "center",
+    gap: tokens.spacingHorizontalL,
+  },
   logo: {
     fontSize: tokens.fontSizeBase500,
     fontWeight: tokens.fontWeightBold,
     color: tokens.colorBrandForeground1,
+  },
+  nav: {
+    display: "flex",
+    gap: tokens.spacingHorizontalXS,
   },
   user: {
     display: "flex",
@@ -37,13 +46,38 @@ const useStyles = makeStyles({
   },
 });
 
-export function Header() {
+export type Page = "meetings" | "interns";
+
+interface HeaderProps {
+  currentPage: Page;
+  onNavigate: (page: Page) => void;
+}
+
+export function Header({ currentPage, onNavigate }: HeaderProps) {
   const styles = useStyles();
   const { email, logout } = useAuth();
 
   return (
     <header className={styles.header}>
-      <span className={styles.logo}>Shadow Me Interns</span>
+      <div className={styles.left}>
+        <span className={styles.logo}>Shadow Me Interns</span>
+        <nav className={styles.nav}>
+          <Button
+            appearance={currentPage === "meetings" ? "subtle" : "transparent"}
+            size="small"
+            onClick={() => onNavigate("meetings")}
+          >
+            Meetings
+          </Button>
+          <Button
+            appearance={currentPage === "interns" ? "subtle" : "transparent"}
+            size="small"
+            onClick={() => onNavigate("interns")}
+          >
+            Intern Directory
+          </Button>
+        </nav>
+      </div>
 
       <div className={styles.user}>
         <Button

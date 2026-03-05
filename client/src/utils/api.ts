@@ -1,5 +1,5 @@
 import { getToken } from "./auth";
-import type { Meeting } from "./types";
+import type { Intern, Meeting } from "./types";
 
 const API_URL = "http://localhost:3000";
 
@@ -61,6 +61,10 @@ export const leaveMeeting = (id: string) =>
 
 export const deleteMeeting = (id: string) =>
   request<{ message: string }>(`/api/items/${id}`, { method: "DELETE" });
+
+// ── Interns ─────────────────────────────────────────────────────────
+
+export const getInterns = () => request<Intern[]>("/api/interns");
 
 /** Download an .ics file and trigger save-as dialog. */
 export const downloadICS = async (id: string, filename: string) => {

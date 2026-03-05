@@ -6,6 +6,7 @@ import { errorHandler } from "./middlewares/errorHandler";
 import { authMiddleware } from "./middlewares/authMiddleware";
 import authRoutes from "./routes/authRoutes";
 import itemRoutes from "./routes/itemRoutes";
+import internRoutes from "./routes/internRoutes";
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use("/api/auth", authRoutes);
 
 // Protected routes (JWT required)
 app.use("/api/items", authMiddleware, itemRoutes);
+app.use("/api/interns", authMiddleware, internRoutes);
 
 // Global error handler (should be after routes)
 app.use(errorHandler);
