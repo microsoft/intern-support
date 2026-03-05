@@ -2,7 +2,9 @@ import { getToken } from "./auth";
 import type { Intern, Meeting } from "./types";
 
 const API_URL =
-  process.env.BUN_PUBLIC_API_URL || "http://localhost:3000";
+  typeof window !== "undefined" && window.location.hostname !== "localhost"
+    ? "https://intern-support-server-cbbveab9ewdtd6c6.swedencentral-01.azurewebsites.net"
+    : "http://localhost:3000";
 
 /** Generic fetch wrapper that injects the JWT and handles errors. */
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
