@@ -8,12 +8,14 @@ import {
   MessageBar,
   MessageBarBody,
   Spinner,
+  Textarea,
   Title3,
   makeStyles,
   tokens,
 } from "@fluentui/react-components";
 import {
   ArrowLeftRegular,
+  CopyRegular,
   KeyRegular,
   MailRegular,
   WeatherMoonRegular,
@@ -26,6 +28,7 @@ import { requestCode, verifyCode } from "../utils/api";
 const useStyles = makeStyles({
   container: {
     display: "flex",
+    flexDirection: "column" as const,
     alignItems: "center",
     justifyContent: "center",
     minHeight: "100vh",
@@ -61,7 +64,25 @@ const useStyles = makeStyles({
     gap: tokens.spacingHorizontalS,
     marginTop: tokens.spacingVerticalS,
   },
+  template: {
+    width: "100%",
+    maxWidth: "420px",
+    marginTop: tokens.spacingVerticalL,
+  },
+  templateHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: tokens.spacingVerticalXS,
+  },
 });
+
+const TEMPLATE = `FW Name: 
+FW Email: 
+Capacity:
+Role: 
+Team: 
+Sector: `;
 
 type Step = "email" | "code";
 
@@ -222,6 +243,27 @@ export function LoginPage({ isDark, onToggleTheme }: LoginPageProps) {
           </form>
         )}
       </Card>
+
+      <div className={styles.template}>
+        <div className={styles.templateHeader}>
+          <Caption1>FTE Forward Template</Caption1>
+          <Button
+            appearance="subtle"
+            icon={<CopyRegular />}
+            size="small"
+            onClick={() => navigator.clipboard.writeText(TEMPLATE)}
+          >
+            Copy
+          </Button>
+        </div>
+        <Textarea
+          value={TEMPLATE}
+          readOnly
+          resize="none"
+          rows={6}
+          style={{ width: "100%", fontFamily: "monospace", fontSize: "12px" }}
+        />
+      </div>
     </div>
   );
 }
