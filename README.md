@@ -1,12 +1,12 @@
 # Intern Support
 
+**This platform allows Interns to get access to real customer-facing meetings, and FTEs get a frictionless way to find intern support for their meetings without extra coordination overhead.**
+
 https://intern.support - not live
 
 ## Project Overview
 
 This project establishes a centralized platform enabling interns in Belgium to easily discover and join (technical) meetings. It accomplishes this by parsing unstructured email inputs sent to a shared inbox by Full-Time Employees (FTEs), structuring the extracted data into explicit JSON objects using AI via Logic Apps, and storing the entries in Azure CosmosDB. A React-based frontend polls the backing server to present the collected schedule to end users.
-
-**This platform allows Interns to get access to real customer-facing meetings, and FTEs get a frictionless way to find intern support for their meetings without extra coordination overhead.**
 
 ## Demo
 
