@@ -8,7 +8,7 @@ This project establishes a centralized platform enabling interns in Belgium to e
 
 ## Demo
 
-[demo_intern_support](./demo_intern_support.mp4)
+<video src="demo_intern_support.mp4" controls width="100%"></video>
 
 ## Why This Exists
 
