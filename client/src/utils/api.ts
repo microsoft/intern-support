@@ -3,7 +3,7 @@ import type { Intern, Meeting } from "./types";
 
 const API_URL =
   typeof window !== "undefined" && window.location.hostname !== "localhost"
-    ? "https://intern-support-server-cbbveab9ewdtd6c6.swedencentral-01.azurewebsites.net"
+    ? "intern-support-server-cbbveab9ewdtd6c6.swedencentral-01.azurewebsites.net"
     : "http://localhost:3000";
 
 /** Generic fetch wrapper that injects the Entra ID token and handles errors. */

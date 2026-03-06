@@ -1,5 +1,3 @@
 {
-  "appService.zipIgnorePattern": ["node_modules{,/**}", ".vscode{,/**}"],
-  "appService.defaultWebAppToDeploy": "/subscriptions/fe851fb5-7227-4e3d-81aa-91e5d8253422/resourceGroups/shadow-me-interns/providers/Microsoft.Web/sites/intern-support-server",
-  "appService.deploySubpath": "server"
+  "appService.zipIgnorePattern": ["node_modules{,/**}", ".vscode{,/**}"]
 }
