@@ -7,14 +7,16 @@ interface Config {
   nodeEnv: string;
   clientUrl: string;
   allowedOrigins: string[];
-  jwtSecret: string;
   whitelistedEmails: string[];
+  entra: {
+    tenantId: string;
+    clientId: string;
+  };
   cosmos: {
     endpoint: string;
     key: string;
     database: string;
     container: string;
-    authContainer: string;
   };
   resendApiKey: string;
   viewonlyBypassEmail: string;
@@ -28,17 +30,19 @@ const config: Config = {
     .split(",")
     .map((o) => o.trim())
     .filter(Boolean),
-  jwtSecret: process.env.JWT_SECRET || "",
   whitelistedEmails: (process.env.WHITELISTED_EMAILS || "")
     .split(",")
     .map((e) => e.toLowerCase().trim())
     .filter(Boolean),
+  entra: {
+    tenantId: process.env.ENTRA_TENANT_ID || "",
+    clientId: process.env.ENTRA_CLIENT_ID || "",
+  },
   cosmos: {
     endpoint: process.env.COSMOS_ENDPOINT || "",
     key: process.env.COSMOS_KEY || "",
     database: process.env.COSMOS_DATABASE || "",
     container: process.env.COSMOS_CONTAINER || "",
-    authContainer: process.env.COSMOS_AUTH_CONTAINER || "auth_codes",
   },
   resendApiKey: process.env.RESEND_API_KEY || "",
   viewonlyBypassEmail: (process.env.VIEWONLY_BYPASS_EMAIL || "")

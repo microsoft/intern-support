@@ -1,3 +1,5 @@
+import { useIsAuthenticated, useMsal } from "@azure/msal-react";
+import { InteractionStatus } from "@azure/msal-browser";
 import {
   createContext,
   useCallback,
@@ -6,61 +8,69 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { validateToken } from "../utils/api";
-import { clearAuth, getToken, setEmail, setToken } from "../utils/auth";
+import { loginRequest, msalInstance } from "../utils/auth";
+import { getMe } from "../utils/api";
 
 interface AuthState {
   isAuthenticated: boolean;
+  isWhitelisted: boolean;
   email: string | null;
   isLoading: boolean;
-  login: (token: string, email: string) => void;
+  login: () => void;
   logout: () => void;
+  whitelistError: boolean;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [email, setEmailState] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { inProgress, accounts } = useMsal();
+  const isMsalAuthenticated = useIsAuthenticated();
+  const [email, setEmail] = useState<string | null>(null);
+  const [isWhitelisted, setIsWhitelisted] = useState(false);
+  const [whitelistError, setWhitelistError] = useState(false);
+  const [checkingWhitelist, setCheckingWhitelist] = useState(false);
 
-  // Check for existing token on mount
+  const isLoading =
+    inProgress !== InteractionStatus.None || checkingWhitelist;
+
+  // Once MSAL authenticates, verify against the backend whitelist
   useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      setIsLoading(false);
-      return;
-    }
+    if (!isMsalAuthenticated || accounts.length === 0) return;
 
-    validateToken(token)
-      .then(({ valid, email: userEmail }) => {
-        if (valid) {
-          setIsAuthenticated(true);
-          setEmailState(userEmail);
-        } else {
-          clearAuth();
-        }
+    setCheckingWhitelist(true);
+    getMe()
+      .then(({ email: userEmail }) => {
+        setEmail(userEmail);
+        setIsWhitelisted(true);
+        setWhitelistError(false);
       })
-      .catch(() => clearAuth())
-      .finally(() => setIsLoading(false));
-  }, []);
+      .catch(() => {
+        setWhitelistError(true);
+        setIsWhitelisted(false);
+      })
+      .finally(() => setCheckingWhitelist(false));
+  }, [isMsalAuthenticated, accounts]);
 
-  const login = useCallback((token: string, userEmail: string) => {
-    setToken(token);
-    setEmail(userEmail);
-    setIsAuthenticated(true);
-    setEmailState(userEmail);
+  const login = useCallback(() => {
+    msalInstance.loginRedirect(loginRequest);
   }, []);
 
   const logout = useCallback(() => {
-    clearAuth();
-    setIsAuthenticated(false);
-    setEmailState(null);
+    msalInstance.logoutRedirect();
   }, []);
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, email, isLoading, login, logout }}
+      value={{
+        isAuthenticated: isMsalAuthenticated && isWhitelisted,
+        isWhitelisted,
+        email,
+        isLoading,
+        login,
+        logout,
+        whitelistError,
+      }}
     >
       {children}
     </AuthContext.Provider>

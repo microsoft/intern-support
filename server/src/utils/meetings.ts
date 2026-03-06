@@ -1,12 +1,7 @@
-import { Container, CosmosClient } from "@azure/cosmos";
+import { Container } from "@azure/cosmos";
 import config from "../config/config";
+import { database } from "./cosmos";
 
-const client = new CosmosClient({
-  endpoint: config.cosmos.endpoint,
-  key: config.cosmos.key,
-});
-
-const database = client.database(config.cosmos.database);
 const container: Container = database.container(config.cosmos.container);
 
 /** Shape of a meeting document as inserted by Logic Apps. */

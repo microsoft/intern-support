@@ -5,6 +5,8 @@
     "": {
       "name": "bun-react-template",
       "dependencies": {
+        "@azure/msal-browser": "^5.4.0",
+        "@azure/msal-react": "^5.0.6",
         "@fluentui/react-components": "^9.56.0",
         "@fluentui/react-icons": "^2.0.271",
         "@tanstack/react-query": "^5.90.21",
@@ -20,6 +22,12 @@
     },
   },
   "packages": {
+    "@azure/msal-browser": ["@azure/msal-browser@5.4.0", "", { "dependencies": { "@azure/msal-common": "16.2.0" } }, "sha512-GvRbLNk26oPOPpnry4Ym8wtXrmdozGm2Sry5EKfui0siwnEuAKWEeMLLyosDo5nVEIIDO1C2t/+HpVzqqCWlfQ=="],
+
+    "@azure/msal-common": ["@azure/msal-common@16.2.0", "", {}, "sha512-ge0nGzTLmEE5lg7tSCbTBrYqMGkpFQeQEtqfcKPuGJn/FPFf8Xz51uDfZsm5xpstNZGMYPhHvnYbL8OeNp/aLw=="],
+
+    "@azure/msal-react": ["@azure/msal-react@5.0.6", "", { "peerDependencies": { "@azure/msal-browser": "^5.4.0", "react": "^19.2.1" } }, "sha512-p0YTCdsx+jkZNR/3Awznn12LxlTcKdsH4/FBiIoD53axn6A4y8g+9sng716PtxMvXSGaRIZo9JKM/yfFdz/+oQ=="],
+
     "@babel/runtime": ["@babel/runtime@7.28.6", "", {}, "sha512-05WQkdpL9COIMz4LjTxGpPNCdlpyimKppYNoJ5Di5EUObifl8t4tuLuUBBZEpoLYOmfvIWrsp9fCl0HoPRVTdA=="],
 
     "@ctrl/tinycolor": ["@ctrl/tinycolor@3.6.1", "", {}, "sha512-SITSV6aIXsuVNV3f3O0f2n/cgyEDWoSqtZMYiAmcsYHydcKrOz3gUxB/iXd/Qf08+IZX4KpgNbvUdMBmWz+kcA=="],

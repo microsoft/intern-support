@@ -6,9 +6,9 @@ const API_URL =
     ? "https://intern-support-server-cbbveab9ewdtd6c6.swedencentral-01.azurewebsites.net"
     : "http://localhost:3000";
 
-/** Generic fetch wrapper that injects the JWT and handles errors. */
+/** Generic fetch wrapper that injects the Entra ID token and handles errors. */
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const token = getToken();
+  const token = await getToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -32,23 +32,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 // ── Auth ────────────────────────────────────────────────────────────
 
-export const requestCode = (email: string) =>
-  request<{ message: string; token?: string }>("/api/auth/request-code", {
-    method: "POST",
-    body: JSON.stringify({ email }),
-  });
-
-export const verifyCode = (email: string, code: string) =>
-  request<{ token: string }>("/api/auth/verify-code", {
-    method: "POST",
-    body: JSON.stringify({ email, code }),
-  });
-
-export const validateToken = (token: string) =>
-  request<{ valid: boolean; email: string }>("/api/auth/validate-token", {
-    method: "POST",
-    body: JSON.stringify({ token }),
-  });
+export const getMe = () => request<{ email: string }>("/api/auth/me");
 
 // ── Meetings ────────────────────────────────────────────────────────
 
@@ -68,21 +52,3 @@ export const deleteMeeting = (id: string) =>
 // ── Interns ─────────────────────────────────────────────────────────
 
 export const getInterns = () => request<Intern[]>("/api/interns");
-
-/** Download an .ics file and trigger save-as dialog. */
-export const downloadICS = async (id: string, filename: string) => {
-  const token = getToken();
-  const res = await fetch(`${API_URL}/api/items/${id}/ics`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-
-  if (!res.ok) throw new Error("Failed to download calendar invite");
-
-  const blob = await res.blob();
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${filename.replace(/[^a-zA-Z0-9 ]/g, "")}.ics`;
-  a.click();
-  URL.revokeObjectURL(url);
-};

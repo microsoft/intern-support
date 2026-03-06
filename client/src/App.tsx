@@ -1,3 +1,4 @@
+import { MsalProvider } from "@azure/msal-react";
 import {
   FluentProvider,
   Spinner,
@@ -14,6 +15,7 @@ import { LoginPage } from "./components/LoginPage";
 import { MeetingList } from "./components/MeetingList";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import "./index.css";
+import { msalInstance } from "./utils/auth";
 
 const TOASTER_ID = "global";
 
@@ -88,17 +90,19 @@ export function App() {
   };
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <FluentProvider
-        theme={isDark ? webDarkTheme : webLightTheme}
-        style={{ minHeight: "100vh" }}
-      >
-        <AuthProvider>
-          <AppContent isDark={isDark} onToggleTheme={toggleTheme} />
-        </AuthProvider>
-        <Toaster toasterId={TOASTER_ID} position="top" />
-      </FluentProvider>
-    </QueryClientProvider>
+    <MsalProvider instance={msalInstance}>
+      <QueryClientProvider client={queryClient}>
+        <FluentProvider
+          theme={isDark ? webDarkTheme : webLightTheme}
+          style={{ minHeight: "100vh" }}
+        >
+          <AuthProvider>
+            <AppContent isDark={isDark} onToggleTheme={toggleTheme} />
+          </AuthProvider>
+          <Toaster toasterId={TOASTER_ID} position="top" />
+        </FluentProvider>
+      </QueryClientProvider>
+    </MsalProvider>
   );
 }
 

@@ -1,35 +1,102 @@
-import { Request, Response, NextFunction } from "express";
-import { verifyToken } from "../utils/jwt";
+import { NextFunction, Request, Response } from "express";
+import jwt from "jsonwebtoken";
+import jwksClient from "jwks-rsa";
+import config from "../config/config";
+import { isWhitelisted } from "../utils/whitelist";
+
+const client = jwksClient({
+  jwksUri: "https://login.microsoftonline.com/common/discovery/v2.0/keys",
+  cache: true,
+  rateLimit: true,
+});
+
+function getSigningKey(kid: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    client.getSigningKey(kid, (err, key) => {
+      if (err || !key) return reject(err ?? new Error("No signing key"));
+      resolve(key.getPublicKey());
+    });
+  });
+}
+
+interface EntraTokenPayload {
+  preferred_username?: string;
+  email?: string;
+  upn?: string;
+}
 
 /**
- * Express middleware that verifies the JWT in the Authorization header.
- * Attaches `req.user` with the decoded email on success.
- * Returns 401 if the token is missing, malformed, or expired.
+ * Express middleware that validates an Entra ID token from the Authorization header.
+ * Extracts the user's email, checks it against the whitelist, and attaches `req.user`.
  */
-export const authMiddleware = (
+export const authMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction,
-): void => {
+): Promise<void> => {
   const header = req.headers.authorization;
 
   if (!header?.startsWith("Bearer ")) {
-    res.status(401).json({ message: "Missing or malformed authorization header" });
+    res
+      .status(401)
+      .json({ message: "Missing or malformed authorization header" });
     return;
   }
 
-  const token = header.slice(7); // strip "Bearer "
-  const payload = verifyToken(token);
+  const token = header.slice(7);
 
-  if (!payload) {
+  try {
+    // Decode header to get kid for key lookup
+    const decoded = jwt.decode(token, { complete: true });
+    if (!decoded || typeof decoded === "string" || !decoded.header.kid) {
+      res.status(401).json({ message: "Invalid token" });
+      return;
+    }
+
+    const signingKey = await getSigningKey(decoded.header.kid);
+
+    const payload = jwt.verify(token, signingKey, {
+      audience: config.entra.clientId,
+      algorithms: ["RS256"],
+    }) as EntraTokenPayload & { iss?: string };
+
+    // Validate issuer is a Microsoft tenant
+    if (!payload.iss?.startsWith("https://login.microsoftonline.com/")) {
+      res.status(401).json({ message: "Invalid token issuer" });
+      return;
+    }
+
+    const email = (
+      payload.preferred_username ??
+      payload.email ??
+      payload.upn ??
+      ""
+    )
+      .toLowerCase()
+      .trim();
+
+    if (!email) {
+      res.status(401).json({ message: "No email claim found in token" });
+      return;
+    }
+
+    if (!isWhitelisted(email)) {
+      res
+        .status(403)
+        .json({ message: "Email is not authorized to access this platform" });
+      return;
+    }
+
+    // Normalize to @microsoft.com alias for consistency across the app
+    const alias = email.split("@")[0]!;
+    const normalizedEmail = `${alias}@microsoft.com`;
+
+    (req as Request & { user: { email: string } }).user = {
+      email: normalizedEmail,
+    };
+    next();
+  } catch (err) {
+    console.error("Token validation failed:", err);
     res.status(401).json({ message: "Invalid or expired token" });
-    return;
   }
-
-  // Attach the authenticated user to the request
-  (req as Request & { user: { email: string } }).user = {
-    email: payload.email,
-  };
-
-  next();
 };

@@ -1,15 +1,33 @@
-const TOKEN_KEY = "intern_support_token";
-const EMAIL_KEY = "intern_support_email";
+import { PublicClientApplication } from "@azure/msal-browser";
 
-export const getToken = (): string | null => localStorage.getItem(TOKEN_KEY);
-export const setToken = (token: string): void =>
-  localStorage.setItem(TOKEN_KEY, token);
+export const msalConfig = {
+  auth: {
+    clientId: "49bcdb40-7ad8-4dea-a84e-fe2cc5bf63f9",
+    authority: "https://login.microsoftonline.com/common",
+    redirectUri:
+      typeof window !== "undefined" && window.location.hostname !== "localhost"
+        ? "https://intern.support/auth/callback"
+        : "http://localhost:5173/auth/callback",
+  },
+};
 
-export const getEmail = (): string | null => localStorage.getItem(EMAIL_KEY);
-export const setEmail = (email: string): void =>
-  localStorage.setItem(EMAIL_KEY, email);
+export const loginRequest = {
+  scopes: ["openid", "profile", "email"],
+};
 
-export const clearAuth = (): void => {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(EMAIL_KEY);
+export const msalInstance = new PublicClientApplication(msalConfig);
+
+export const getToken = async (): Promise<string | null> => {
+  const accounts = msalInstance.getAllAccounts();
+  if (accounts.length === 0) return null;
+
+  try {
+    const response = await msalInstance.acquireTokenSilent({
+      ...loginRequest,
+      account: accounts[0],
+    });
+    return response.idToken;
+  } catch {
+    return null;
+  }
 };

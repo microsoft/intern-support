@@ -18,10 +18,10 @@ app.get("/", (_req, res) => {
   res.json({ status: "ok", message: "Intern Support API" });
 });
 
-// Auth routes (public — no JWT required)
+// Auth routes (Entra ID token validated internally)
 app.use("/api/auth", authRoutes);
 
-// Protected routes (JWT required)
+// Protected routes (Entra ID token + whitelist)
 app.use("/api/items", authMiddleware, itemRoutes);
 app.use("/api/interns", authMiddleware, internRoutes);
 
