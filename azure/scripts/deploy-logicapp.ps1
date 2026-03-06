@@ -14,7 +14,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$templateFile = Join-Path $PSScriptRoot "logicapp.bicep"
+$templateFile = Join-Path (Join-Path $PSScriptRoot "..") (Join-Path "bicep" "logicapp.bicep")
 if (-not (Test-Path $templateFile)) {
     Write-Error "logicapp.bicep not found in azure/"
     exit 1

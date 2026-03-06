@@ -2,7 +2,7 @@
 $ErrorActionPreference = "Stop"
 
 # Load deployment token from azure/.env
-$envFile = Join-Path $PSScriptRoot ".env"
+$envFile = Join-Path (Join-Path $PSScriptRoot "..") ".env"
 if (-not (Test-Path $envFile)) {
     Write-Error "azure/.env not found. Create it with DEPLOYMENT_TOKEN=<your-token>"
     exit 1
@@ -15,7 +15,7 @@ if (-not $token) {
 }
 
 # Build
-$clientDir = Join-Path (Join-Path $PSScriptRoot "..") "client"
+$clientDir = Join-Path (Join-Path $PSScriptRoot "..\.."  ) "client"
 Push-Location $clientDir
 Write-Host "Building client..." -ForegroundColor Cyan
 bun run build
