@@ -1,5 +1,7 @@
 # Intern Support
 
+https://intern.support - not live
+
 ## Project Overview
 
 This project establishes a centralized platform enabling interns in Belgium to easily locate and shadow (technical) meetings. It accomplishes this by parsing unstructured email inputs sent to a "shadow inbox" by Full-Time Employees (FTEs), structuring the extracted data into explicit JSON objects using AI via Logic Apps, and storing the entries in Azure CosmosDB. A React-based frontend polls the backing server to present the collected schedule to end users.
