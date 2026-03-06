@@ -4,8 +4,11 @@
 
 This project establishes a centralized platform enabling interns in Belgium to easily locate and shadow (technical) meetings. It accomplishes this by parsing unstructured email inputs sent to a "shadow inbox" by Full-Time Employees (FTEs), structuring the extracted data into explicit JSON objects using AI via Logic Apps, and storing the entries in Azure CosmosDB. A React-based frontend polls the backing server to present the collected schedule to end users.
 
-> [!NOTE]
-> The shadow inbox is private, if you want to know the shadow inbox address, message Aryan Shah (t-aryanshah) on Teams or through Outlook. This is to prevent abuse.
+**This platform allows Interns to get access to real customer-facing meetings, and FTEs get a frictionless way to support intern development without extra coordination overhead.**
+
+## Demo
+
+[demo_intern_support](./demo_intern_support.mp4)
 
 ## Why This Exists
 
@@ -17,8 +20,6 @@ As an intern, shadowing customer-facing meetings is one of the most effective wa
 - **Some meetings simply cannot be shadowed.** Some meetings might be sensitive or the customer might prefer to not have interns shadow the meeting.
 
 The core problem: there was no central place where interns could browse meetings that are explicitly available for shadowing.
-
-**This platform allows Interns to get access to real customer-facing meetings, and FTEs get a frictionless way to support intern development without extra coordination overhead.**
 
 ## How It Works
 
@@ -66,15 +67,21 @@ Team: AI Apps
 
 ![Architecture Diagram](architecture.svg)
 
-| Component              | Technology                                |
-| ---------------------- | ----------------------------------------- |
-| **Inbox**              | Email forwarding trigger (`@outlook.com`) |
-| **Processing**         | Microsoft Logic Apps workflow engine      |
-| **Data Parser**        | Azure OpenAI Agent (`gpt-4o-mini`)        |
-| **Backend Storage**    | Azure Cosmos DB (serverless)              |
-| **Frontend**           | React with TypeScript (Vite)              |
-| **State/Data Polling** | TanStack Query `useQuery()`               |
-| **API Route Setup**    | Express Server                            |
+| Component               | Technology                                |
+| ----------------------- | ----------------------------------------- |
+| **Inbox**               | Email forwarding trigger (`@outlook.com`) |
+| **Processing**          | Microsoft Logic Apps workflow engine      |
+| **Data Parser**         | Azure OpenAI Agent (`gpt-4o-mini`)        |
+| **Backend Storage**     | Azure Cosmos DB (serverless)              |
+| **Backend API**         | Express Server (Node.js / TypeScript)     |
+| **Frontend**            | React with TypeScript (Bun)               |
+| **UI Library**          | Fluent UI React v9                        |
+| **State/Data Polling**  | TanStack Query `useQuery()` (5s interval) |
+| **Authentication**      | Microsoft Entra ID (MSAL)                 |
+| **Email Notifications** | Resend API                                |
+| **Frontend Hosting**    | Azure Static Web Apps                     |
+| **Backend Hosting**     | Azure App Service (Linux, Node 24)        |
+| **IaC**                 | Bicep templates                           |
 
 ## Application Flow
 
@@ -104,63 +111,90 @@ Logic Apps generally hide extraction agent data payloads inside hidden `lastAssi
 
 Connects the newly structured JSON nodes directly to insert rows into a database matching frontend structure mappings.
 
-### 5. Frontend Display Environment (React TS / Tanstack)
+### 5. Frontend Display Environment (React TS / TanStack)
 
 A user-facing application built on React that dynamically retrieves available schedule inputs.
 
-- **Database Polling:** Rather than refreshing constantly, TanStack Query (`useQuery`) polls the database every 5 seconds. This fetches records effectively without a constant UI refresh penalty, tracking valid objects inserted via the Logic Apps workflow.
-- **Authentication:** Sessions are managed locally. Validation happens through temporary code processes sent via email, matching Microsoft `@microsoft.com` rules. Validated code responses store secure session markers in the browser cache to bypass future lockouts.
+- **Database Polling:** TanStack Query (`useQuery`) polls the database every 5 seconds. This fetches records effectively without a constant UI refresh penalty.
+- **Authentication:** Microsoft Entra ID via MSAL (redirect flow). After Entra authentication, the backend verifies the ID token and checks the user's email against a whitelist.
+- **View-only mode:** Users authenticated via Entra ID but not on the whitelist can still browse meetings in read-only mode (join/leave/calendar buttons disabled, delete still available).
+- **Dark mode:** User-togglable light/dark theme using Fluent UI's `webLightTheme` / `webDarkTheme`, persisted in `localStorage`.
 
 ## Security
 
-- **Protected meeting data.** Meeting invites often contain sensitive customer information (join links, attendee lists, agenda notes). Access to the dashboard is restricted so this data doesn't end up in the wrong hands.
-- **Passwordless authentication.** Interns log in by entering their `@microsoft.com` email address. A one-time 6-digit verification code is sent to that address and must be confirmed before access is granted — no passwords to manage or leak.
-- **Dedicated whitelist.** Only a preconfigured list of Belgium intern email addresses can request a code. Any unrecognised email is rejected at the first step, preventing unauthorized access entirely.
-- **Session tokens.** After successful verification a signed JWT is issued (7-day expiry) and stored in the browser. Subsequent visits skip the login flow as long as the token is valid, keeping the experience frictionless.
-- **Private shadow inbox.** The inbox address is not published anywhere in this repository or in the frontend. To obtain it, contact the project maintainer directly on Teams or Outlook. This prevents external or automated misuse of the ingestion pipeline.
+- **Entra ID authentication.** Users sign in with their Microsoft organizational account via MSAL's authorization code flow with PKCE. No passwords are managed by the application.
+- **Whitelist enforcement.** A preconfigured list of Belgium intern email addresses determines full access. The whitelist is stored as an environment variable on the backend and matched by alias prefix to handle cross-tenant UPNs.
+- **View-only access.** Authenticated users not on the whitelist can browse meetings but cannot join, leave, or add to calendar. Delete is still available for cleanup.
+- **ID token validation.** The backend validates Entra ID tokens using Microsoft's JWKS endpoint (`jwks-rsa`), checking audience, issuer, and signing key.
+- **Rate limiting.** Auth endpoints are limited to 10 requests per 15 minutes per IP. API endpoints are limited to 100 requests per 15 minutes per IP.
+- **Private shadow inbox.** The inbox address is not published anywhere in this repository or in the frontend. To obtain it, contact the project maintainer directly on Teams or Outlook.
 
 ## Deployment
 
-The Logic App infrastructure is defined as a Bicep template in `azure/logicapp.bicep`. It is fully parameterized so it can be deployed to any Azure subscription and resource group.
+All infrastructure is defined as Bicep templates in `azure/bicep/` with corresponding deployment scripts in `azure/scripts/`.
 
 ### Prerequisites
 
-- An Azure resource group in the target subscription.
-- An Azure Cosmos DB account with a database and container ready to receive documents.
+- Azure CLI installed and authenticated (`az login`)
+- Bun runtime installed (for frontend builds)
+- Node.js / npm installed (for backend builds)
+- An Entra ID app registration (single-page application, multi-tenant)
 
-### Parameters
+### Deployment Scripts
 
-| Parameter                                    | Default                       | Description                    |
-| -------------------------------------------- | ----------------------------- | ------------------------------ |
-| `workflows_shadow_me_interns_logic_app_name` | `shadow_me_interns_logic_app` | Name of the Logic App resource |
-| `location`                                   | Resource group location       | Azure region for deployment    |
-| `cosmosDbAccountName`                        | `shadow-me-interns-db-msft`   | Cosmos DB account name         |
-| `cosmosDbDatabaseName`                       | `shadow_meetings`             | Cosmos DB database name        |
-| `cosmosDbContainerName`                      | `meetings`                    | Cosmos DB container name       |
+| Script                                  | Purpose                                              |
+| --------------------------------------- | ---------------------------------------------------- |
+| `azure/scripts/deploy-all.ps1`          | Deploys all infrastructure (except backend code)     |
+| `azure/scripts/deploy-client.ps1`       | Builds and deploys frontend to Azure Static Web Apps |
+| `azure/scripts/deploy-server.ps1`       | Builds and deploys backend to Azure App Service      |
+| `azure/scripts/deploy-database.ps1`     | Deploys Cosmos DB infrastructure                     |
+| `azure/scripts/deploy-appservice.ps1`   | Deploys App Service infrastructure                   |
+| `azure/scripts/deploy-staticwebapp.ps1` | Deploys Static Web App infrastructure                |
+| `azure/scripts/deploy-logicapp.ps1`     | Deploys Logic App infrastructure                     |
 
-The subscription ID, resource group name, and API connection resources are automatically resolved and created by the template.
+### Quick Start
 
-### Deploy
+```powershell
+# Deploy all infrastructure
+.\azure\scripts\deploy-all.ps1 -ResourceGroup "intern-support"
 
-```bash
-az deployment group create \
-  --resource-group <your-resource-group> \
-  --template-file azure/logicapp.bicep \
-  --parameters cosmosDbAccountName='<your-cosmos-account>'
+# Deploy frontend only
+.\azure\scripts\deploy-client.ps1
+
+# Deploy backend (via VS Code: right-click server/ → Deploy to Web App)
 ```
 
-Override additional parameters as needed:
+> [!IMPORTANT]
+> The App Service backend code must be deployed manually via VS Code (right-click `server/` → Deploy to Web App). The `deploy-all.ps1` script deploys infrastructure only.
 
-```bash
-az deployment group create \
-  --resource-group <your-resource-group> \
-  --template-file azure/logicapp.bicep \
-  --parameters \
-    cosmosDbAccountName='<your-cosmos-account>' \
-    cosmosDbDatabaseName='<your-database>' \
-    cosmosDbContainerName='<your-container>' \
-    location='westeurope'
-```
+### Environment Variables
+
+**Backend (App Service):**
+
+| Variable                | Description                                     |
+| ----------------------- | ----------------------------------------------- |
+| `ENTRA_TENANT_ID`       | Entra ID directory (tenant) ID                  |
+| `ENTRA_CLIENT_ID`       | Entra ID application (client) ID                |
+| `COSMOS_ENDPOINT`       | Cosmos DB account endpoint                      |
+| `COSMOS_KEY`            | Cosmos DB account key                           |
+| `COSMOS_DATABASE`       | Cosmos DB database name                         |
+| `COSMOS_CONTAINER`      | Cosmos DB container name                        |
+| `RESEND_API_KEY`        | Resend email service API key                    |
+| `WHITELISTED_EMAILS`    | Comma-separated list of allowed email addresses |
+| `VIEWONLY_BYPASS_EMAIL` | Email that bypasses auth entirely (for demos)   |
+| `ALLOWED_ORIGINS`       | Comma-separated CORS origins                    |
+
+**Frontend (client/src/utils/auth.ts):**
+
+The Entra ID `clientId` and `authority` are configured directly in the MSAL config file.
+
+### Entra ID Setup
+
+1. Register a **single-page application** in Entra ID (multi-tenant)
+2. Add redirect URIs: `https://your-domain.com`, `http://localhost:5173`
+3. Under **Expose an API**, set the Application ID URI and add an `access_as_user` scope
+4. Under **Token configuration**, add the `email` optional claim for ID tokens
+5. Under **Supported account types**, select "Multiple Entra ID tenants"
 
 ### Post-Deployment: Authorize API Connections
 
