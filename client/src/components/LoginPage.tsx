@@ -90,6 +90,7 @@ export function LoginPage({ isDark, onToggleTheme }: LoginPageProps) {
         icon={isDark ? <WeatherSunnyRegular /> : <WeatherMoonRegular />}
         size="small"
         onClick={onToggleTheme}
+        aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
       />
       <Card className={styles.card} appearance="outline">
         <div className={styles.header}>
@@ -141,6 +142,7 @@ export function LoginPage({ isDark, onToggleTheme }: LoginPageProps) {
           resize="none"
           rows={6}
           style={{ width: "100%", fontFamily: "monospace", fontSize: "12px" }}
+          aria-label="FTE Forward Template"
         />
       </div>
     </div>
