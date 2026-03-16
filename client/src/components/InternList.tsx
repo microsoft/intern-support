@@ -151,6 +151,7 @@ export function InternList() {
           <Dropdown
             className={styles.dropdown}
             placeholder="All roles"
+            aria-label="Filter by role"
             value={roleFilter === ALL ? "All roles" : roleFilter}
             onOptionSelect={(_e, data) =>
               setRoleFilter(data.optionValue ?? ALL)
@@ -169,6 +170,7 @@ export function InternList() {
           <Dropdown
             className={styles.dropdown}
             placeholder="All teams"
+            aria-label="Filter by team"
             value={teamFilter === ALL ? "All teams" : teamFilter}
             onOptionSelect={(_e, data) =>
               setTeamFilter(data.optionValue ?? ALL)

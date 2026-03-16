@@ -91,7 +91,12 @@ export function App() {
         .forEach((el) => el.setAttribute("tabindex", "-1"));
     fix();
     const observer = new MutationObserver(fix);
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["tabindex"],
+    });
     return () => observer.disconnect();
   }, []);
 
