@@ -199,6 +199,7 @@ export function FilterBar({
         <Dropdown
           className={styles.dropdown}
           placeholder="All teams"
+          aria-label="Filter by team"
           value={team === ALL ? "All teams" : team}
           onOptionSelect={(_e, data) => onTeamChange(data.optionValue ?? ALL)}
         >
@@ -215,6 +216,7 @@ export function FilterBar({
         <Dropdown
           className={styles.dropdown}
           placeholder="All sectors"
+          aria-label="Filter by sector"
           value={sector === ALL ? "All sectors" : sector}
           onOptionSelect={(_e, data) => onSectorChange(data.optionValue ?? ALL)}
         >
@@ -231,6 +233,7 @@ export function FilterBar({
         <Dropdown
           className={styles.dropdown}
           placeholder="All roles"
+          aria-label="Filter by role"
           value={role === ALL ? "All roles" : role}
           onOptionSelect={(_e, data) => onRoleChange(data.optionValue ?? ALL)}
         >
@@ -246,6 +249,7 @@ export function FilterBar({
       <Dropdown
         className={styles.dropdown}
         placeholder="Availability"
+        aria-label="Filter by availability"
         value={
           availability === ALL
             ? "All"

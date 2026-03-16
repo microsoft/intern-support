@@ -8,7 +8,7 @@ import {
   webLightTheme,
 } from "@fluentui/react-components";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Header, type Page } from "./components/Header";
 import { InternList } from "./components/InternList";
 import { LoginPage } from "./components/LoginPage";
@@ -80,6 +80,20 @@ export function App() {
   const [isDark, setIsDark] = useState(
     () => localStorage.getItem("intern_support_theme") === "dark",
   );
+
+  // Fix Fluent UI Tabster dummy elements that are aria-hidden but focusable
+  useEffect(() => {
+    const fix = () =>
+      document
+        .querySelectorAll(
+          '[data-tabster-dummy][aria-hidden="true"][tabindex="0"]',
+        )
+        .forEach((el) => el.setAttribute("tabindex", "-1"));
+    fix();
+    const observer = new MutationObserver(fix);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
 
   const toggleTheme = () => {
     setIsDark((prev) => {

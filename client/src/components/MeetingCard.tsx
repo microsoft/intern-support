@@ -156,6 +156,7 @@ export function MeetingCard({
             size="small"
             disabled={isViewOnly}
             onClick={() => onDelete(meeting)}
+            aria-label={`Delete ${meeting.subject}`}
           />
         }
       />
