@@ -14,7 +14,6 @@ import { InternList } from "./components/InternList";
 import { LoginPage } from "./components/LoginPage";
 import { MeetingList } from "./components/MeetingList";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
-import "./index.css";
 import { msalInstance } from "./utils/auth";
 
 const TOASTER_ID = "global";
