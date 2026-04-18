@@ -1,0 +1,2093 @@
+<!-- Tool is optimized for speed, hence why pure HTML/CSS/JS -->
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>INTERN-SUPPORT · ATMT THREAT MODEL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inconsolata:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ============== TOKENS — OLED grayscale ============== */
+      :root {
+        --bg: #000;
+        --surface: #050505;
+        --surface-2: #0a0a0a;
+        --rule: #1a1a1a;
+        --rule-2: #2a2a2a;
+        --rule-3: #3a3a3a;
+        --muted: #6a6a6a;
+        --soft: #9a9a9a;
+        --text: #fefefe;
+
+        --f-mono: "JetBrains Mono", "SF Mono", Consolas, monospace;
+        --f-text: "Inconsolata", "JetBrains Mono", monospace;
+
+        --banner-h: 24px;
+        --rail-w: 440px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+        }
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        height: 100vh;
+        max-width: 100vw;
+        max-height: 100vh;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--f-text);
+        font-size: 14px;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+      ::selection {
+        background: var(--text);
+        color: var(--bg);
+      }
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--rule-2);
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--rule-3);
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--bg);
+      }
+
+      /* ============== BANNERS ============== */
+      .banner {
+        height: var(--banner-h);
+        border-bottom: 1px solid var(--rule);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 0 18px;
+        font-family: var(--f-mono);
+        font-size: 10px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--muted);
+        flex: 0 0 auto;
+        animation: fadeIn 0.45s ease-out both;
+      }
+      .banner.bottom {
+        border-bottom: none;
+        border-top: 1px solid var(--rule);
+      }
+      .banner .dots {
+        flex: 1;
+        height: 1px;
+        border-bottom: 1px dashed var(--rule-2);
+      }
+      .banner .live {
+        color: var(--text);
+      }
+      .banner .live::before {
+        content: "";
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        background: var(--text);
+        margin-right: 8px;
+        vertical-align: 1px;
+        animation: blink 1.6s steps(2, end) infinite;
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0.15;
+        }
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      /* ============== HEADER ============== */
+      header.id {
+        flex: 0 0 auto;
+        border-bottom: 1px solid var(--rule);
+        padding: 14px 0 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-width: 0;
+      }
+      .id-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 24px;
+        justify-content: space-between;
+        min-width: 0;
+        padding: 0 24px;
+      }
+      .id-meta {
+        font-family: var(--f-mono);
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex: 0 0 auto;
+        text-align: right;
+        animation: fadeIn 0.5s 0.05s both;
+      }
+      .id-meta > div {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+      .id-meta b {
+        color: var(--text);
+        font-weight: 500;
+      }
+      h1.title {
+        margin: 0;
+        flex: 1 1 auto;
+        min-width: 0;
+        font-family: var(--f-mono);
+        font-weight: 300;
+        font-size: clamp(20px, 2.4vw, 32px);
+        line-height: 1.1;
+        letter-spacing: -0.01em;
+        color: var(--text);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        animation: titleIn 0.55s 0.15s both ease-out;
+      }
+      h1.title em {
+        font-style: normal;
+        color: var(--soft);
+        font-weight: 300;
+      }
+      .id-desc {
+        margin: 0;
+        padding: 0 24px;
+        font-family: var(--f-text);
+        font-size: 13px;
+        color: var(--soft);
+        max-width: 90ch;
+        animation: titleIn 0.55s 0.25s both ease-out;
+      }
+      /* Compact stats strip — single row of cells separated by hairlines */
+      .stats-strip {
+        display: flex;
+        align-items: stretch;
+        flex-wrap: wrap;
+        border-top: 1px solid var(--rule);
+        min-width: 0;
+        animation: fadeIn 0.55s 0.35s both;
+      }
+      .stat {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        padding: 10px 16px 12px;
+        min-width: 0;
+        border-right: 1px solid var(--rule);
+      }
+      .stat:first-child {
+        padding-left: 24px;
+      }
+      .stat:last-child {
+        padding-right: 24px;
+        border-right: 0;
+      }
+      .stat .k {
+        font-family: var(--f-mono);
+        font-size: 9.5px;
+        color: var(--muted);
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+      .stat .v {
+        font-family: var(--f-mono);
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text);
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+      }
+      .stat.severity .v {
+        letter-spacing: 0.02em;
+        color: var(--soft);
+      }
+      .stat.severity .v b {
+        color: var(--text);
+        font-weight: 500;
+      }
+
+      @keyframes titleIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      /* ============== MAIN ============== */
+      main {
+        flex: 1 1 auto;
+        min-height: 0;
+        min-width: 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, var(--rail-w));
+        overflow: hidden;
+      }
+
+      /* ============== DIAGRAM PANE ============== */
+      #diagram-wrap {
+        position: relative;
+        min-width: 0;
+        min-height: 0;
+        overflow: hidden;
+        border-right: 1px solid var(--rule);
+        background:
+          linear-gradient(rgba(40, 40, 40, 0.1) 1px, transparent 1px) 0 0/24px
+            24px,
+          linear-gradient(90deg, rgba(40, 40, 40, 0.1) 1px, transparent 1px) 0
+            0/24px 24px,
+          var(--bg);
+        cursor: grab;
+      }
+      #diagram-wrap.dragging {
+        cursor: grabbing;
+      }
+      #diagram {
+        display: block;
+        width: 100%;
+        height: 100%;
+        user-select: none;
+      }
+      .corner-label {
+        position: absolute;
+        font-family: var(--f-mono);
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        pointer-events: none;
+      }
+      .corner-label.tl {
+        top: 12px;
+        left: 16px;
+      }
+      .corner-label.bl {
+        bottom: 12px;
+        left: 16px;
+      }
+      .hud {
+        position: absolute;
+        bottom: 12px;
+        right: 16px;
+        display: flex;
+        gap: 0;
+        border: 1px solid var(--rule-2);
+        background: var(--bg);
+        font-family: var(--f-mono);
+        font-size: 11px;
+        overflow: hidden;
+      }
+      .hud button {
+        width: 28px;
+        height: 28px;
+        background: transparent;
+        color: var(--soft);
+        border: none;
+        border-left: 1px solid var(--rule-2);
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 14px;
+        transition:
+          background 0.12s,
+          color 0.12s;
+      }
+      .hud button:first-child {
+        border-left: none;
+      }
+      .hud button:hover {
+        background: var(--surface);
+        color: var(--text);
+      }
+      .hud .zoom-val {
+        padding: 0 10px;
+        display: flex;
+        align-items: center;
+        color: var(--muted);
+        border-left: 1px solid var(--rule-2);
+        min-width: 56px;
+        justify-content: center;
+      }
+
+      /* SVG element styles */
+      .tb-rect {
+        fill: transparent;
+        stroke: var(--rule-2);
+        stroke-width: 1;
+        stroke-dasharray: 6 5;
+      }
+      .tb-tag {
+        font-family: var(--f-mono);
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        fill: var(--soft);
+        text-transform: uppercase;
+      }
+      .tb-tag-bg {
+        fill: var(--bg);
+        stroke: var(--rule-2);
+        stroke-width: 1;
+      }
+      .tb-corner {
+        stroke: var(--soft);
+        stroke-width: 1;
+        fill: none;
+        opacity: 0.55;
+      }
+
+      .node-card {
+        fill: var(--surface);
+        stroke: var(--rule-2);
+        stroke-width: 1;
+        cursor: pointer;
+        transition:
+          fill 0.15s,
+          stroke 0.15s;
+      }
+      .node-card:hover {
+        fill: var(--surface-2);
+        stroke: var(--soft);
+      }
+      .node-card.selected {
+        stroke: var(--text);
+        stroke-width: 2;
+        fill: var(--surface-2);
+      }
+      .node-strip {
+        fill: transparent;
+        stroke: var(--rule-2);
+        stroke-width: 1;
+        pointer-events: none;
+      }
+      .node-strip-text {
+        font-family: var(--f-mono);
+        font-size: 8.5px;
+        font-weight: 500;
+        fill: var(--soft);
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        pointer-events: none;
+        text-anchor: middle;
+      }
+      .node-id {
+        font-family: var(--f-mono);
+        font-size: 9px;
+        fill: var(--muted);
+        pointer-events: none;
+        text-anchor: middle;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+      }
+      .node-name {
+        font-family: var(--f-mono);
+        font-size: 11px;
+        font-weight: 400;
+        fill: var(--text);
+        pointer-events: none;
+        text-anchor: middle;
+        letter-spacing: -0.01em;
+      }
+      .crosshair {
+        stroke: var(--text);
+        stroke-width: 1.4;
+        fill: none;
+        opacity: 0;
+      }
+      .crosshair.on {
+        opacity: 1;
+        animation: pulseCH 1.4s ease-in-out infinite;
+      }
+
+      /* Threat-driven highlight */
+      .node-g,
+      .edge-line {
+        transition: opacity 220ms ease;
+      }
+      body.threat-mode .node-g.dim {
+        opacity: 0.18;
+      }
+      body.threat-mode .edge-line.dim {
+        opacity: 0.12;
+      }
+      body.threat-mode .node-g.dim .crosshair {
+        opacity: 0;
+      }
+      .node-g.related .node-card {
+        stroke: var(--text);
+        stroke-width: 2;
+        fill: var(--surface-2);
+        animation: relPulse 1.6s ease-in-out infinite;
+      }
+      .node-g.related .node-strip {
+        stroke: var(--rule-3);
+      }
+      .edge-line.related {
+        stroke: var(--text);
+        stroke-width: 1.6;
+        opacity: 1;
+      }
+      @keyframes relPulse {
+        0%,
+        100% {
+          stroke-width: 2;
+        }
+        50% {
+          stroke-width: 2.6;
+        }
+      }
+      @keyframes pulseCH {
+        50% {
+          opacity: 0.45;
+        }
+      }
+
+      .edge-line {
+        fill: none;
+        stroke: var(--rule-3);
+        stroke-width: 1.2;
+      }
+      .edge-line.selected {
+        stroke: var(--text);
+        stroke-width: 1.8;
+      }
+      .edge-hit {
+        fill: none;
+        stroke: transparent;
+        stroke-width: 16;
+        cursor: pointer;
+      }
+      .edge-hit:hover + .edge-line {
+        stroke: var(--soft);
+      }
+      .edge-arrow {
+        fill: var(--rule-3);
+      }
+      .edge-arrow.hi {
+        fill: var(--text);
+      }
+
+      /* ============== FOLIO ============== */
+      aside.folio {
+        min-width: 0;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        background: var(--bg);
+        overflow: hidden;
+      }
+      .folio-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--rule);
+        flex: 0 0 auto;
+      }
+      .ftab {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 12px 10px 10px;
+        background: transparent;
+        border: none;
+        font-family: var(--f-mono);
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--muted);
+        cursor: pointer;
+        position: relative;
+        transition: color 0.12s;
+        border-right: 1px solid var(--rule);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-align: left;
+      }
+      .ftab:last-child {
+        border-right: none;
+      }
+      .ftab:hover {
+        color: var(--soft);
+      }
+      .ftab.active {
+        color: var(--text);
+      }
+      .ftab.active::after {
+        content: "";
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        bottom: -1px;
+        height: 2px;
+        background: var(--text);
+        animation: underlineIn 0.25s ease-out;
+      }
+      @keyframes underlineIn {
+        from {
+          transform: scaleX(0);
+          transform-origin: left;
+        }
+        to {
+          transform: scaleX(1);
+        }
+      }
+      .ftab .num {
+        font-size: 9px;
+        color: var(--muted);
+        margin-right: 6px;
+        vertical-align: 1px;
+      }
+      .ftab.active .num {
+        color: var(--soft);
+      }
+
+      .pane {
+        display: none;
+        padding: 18px 22px 28px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        flex: 1 1 auto;
+        min-height: 0;
+        min-width: 0;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+      .pane.active {
+        display: block;
+        animation: paneIn 0.25s ease-out;
+      }
+      @keyframes paneIn {
+        from {
+          opacity: 0;
+          transform: translateY(3px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      .empty {
+        margin-top: 20px;
+        padding: 32px 18px;
+        text-align: center;
+        border: 1px dashed var(--rule-2);
+        color: var(--muted);
+        font-family: var(--f-text);
+        font-size: 13px;
+      }
+      .empty .arrow {
+        font-family: var(--f-mono);
+        font-size: 11px;
+        letter-spacing: 0.2em;
+        display: block;
+        margin-bottom: 10px;
+        color: var(--soft);
+      }
+
+      .pane h2 {
+        margin: 22px 0 10px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid var(--rule);
+        font-family: var(--f-mono);
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--soft);
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+      .pane h2 .count {
+        font-family: var(--f-mono);
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: 0.1em;
+      }
+      .pane > h2:first-child {
+        margin-top: 0;
+      }
+
+      .memo {
+        background: var(--surface);
+        border: 1px solid var(--rule);
+        padding: 13px 15px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition:
+          border-color 0.12s,
+          background 0.12s;
+        animation: memoIn 0.35s both ease-out;
+      }
+      .memo:hover {
+        border-color: var(--rule-3);
+        background: var(--surface-2);
+      }
+      .memo.static {
+        cursor: default;
+      }
+      .memo.static:hover {
+        border-color: var(--rule);
+        background: var(--surface);
+      }
+      .memo.threat.active {
+        border-color: var(--rule-3);
+        background: var(--surface-2);
+        box-shadow: inset 3px 0 0 0 var(--text);
+      }
+      .memo.threat.active .chip {
+        cursor: pointer;
+        transition:
+          color 120ms,
+          border-color 120ms,
+          background 120ms;
+      }
+      .memo.threat.active .chip:hover {
+        color: var(--text);
+        border-color: var(--rule-3);
+        background: #000;
+      }
+      .memo.threat.active .chip.unmatched {
+        opacity: 0.4;
+        cursor: default;
+      }
+      .memo.threat.active .chip.unmatched:hover {
+        color: var(--soft);
+        border-color: var(--rule-2);
+        background: transparent;
+      }
+      @keyframes memoIn {
+        from {
+          opacity: 0;
+          transform: translateY(4px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      .label-row {
+        font-family: var(--f-mono);
+        font-size: 9.5px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--muted);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid var(--rule);
+        gap: 10px;
+      }
+      .label-row .right {
+        color: var(--soft);
+      }
+
+      .memo .name {
+        margin: 0 0 6px;
+        font-family: var(--f-mono);
+        font-weight: 400;
+        font-size: 14.5px;
+        line-height: 1.3;
+        color: var(--text);
+        letter-spacing: -0.01em;
+      }
+      .memo .name .arrow {
+        color: var(--muted);
+        margin: 0 6px;
+        font-weight: 300;
+      }
+      .memo .body {
+        font-family: var(--f-text);
+        font-size: 13px;
+        color: var(--soft);
+      }
+      .memo .body code {
+        font-family: var(--f-mono);
+        font-size: 12px;
+        background: var(--bg);
+        padding: 0 4px;
+        color: var(--text);
+        overflow-wrap: anywhere;
+        word-break: break-all;
+      }
+      .memo .body {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+      .memo .name {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 8px;
+      }
+      .chip {
+        font-family: var(--f-mono);
+        font-size: 9.5px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        padding: 2px 8px;
+        border: 1px solid var(--rule-2);
+        color: var(--soft);
+        background: var(--bg);
+      }
+      .chip.strong {
+        color: var(--text);
+        border-color: var(--rule-3);
+      }
+
+      .exhibits {
+        margin-top: 10px;
+        padding: 8px 0 0;
+        border-top: 1px solid var(--rule);
+      }
+      .exhibit {
+        font-family: var(--f-text);
+        font-size: 12.5px;
+        color: var(--soft);
+        margin: 6px 0;
+        padding-left: 76px;
+        position: relative;
+      }
+      .exhibit b {
+        position: absolute;
+        left: 0;
+        top: 0;
+        font-family: var(--f-mono);
+        font-size: 9.5px;
+        font-weight: 500;
+        color: var(--muted);
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      /* ============== SEVERITY (grayscale weight/density) ============== */
+      .sev {
+        display: inline-block;
+        font-family: var(--f-mono);
+        font-size: 9.5px;
+        font-weight: 500;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        padding: 3px 10px;
+      }
+      .sev.high {
+        color: var(--text);
+        background: var(--rule);
+        border: 1px solid var(--text);
+        box-shadow:
+          inset 0 0 0 1px var(--bg),
+          inset 0 0 0 2px var(--text);
+        padding: 4px 12px;
+      }
+      .sev.med {
+        color: var(--soft);
+        border: 1px solid var(--rule-3);
+      }
+      .sev.low {
+        color: var(--muted);
+        border: 1px dashed var(--rule-2);
+      }
+
+      /* ============== A11Y ============== */
+      .ftab:focus-visible,
+      .memo:focus-visible,
+      .hud button:focus-visible {
+        outline: 2px solid var(--text);
+        outline-offset: 2px;
+      }
+      .node-card:focus {
+        outline: none;
+        stroke: var(--text);
+        stroke-width: 2;
+      }
+      .edge-hit:focus {
+        outline: none;
+      }
+      .edge-hit:focus + .edge-line {
+        stroke: var(--text);
+        stroke-width: 1.8;
+      }
+
+      /* ============== RESPONSIVE ============== */
+      @media (max-width: 1100px) {
+        :root {
+          --rail-w: 100%;
+        }
+        main {
+          grid-template-columns: 1fr;
+          grid-template-rows: minmax(0, 1.2fr) minmax(0, 1fr);
+        }
+        aside.folio {
+          border-top: 1px solid var(--rule);
+        }
+        #diagram-wrap {
+          border-right: none;
+        }
+        header.id {
+          padding: 12px 16px;
+        }
+        .id-top {
+          flex-wrap: wrap;
+          gap: 10px;
+        }
+      }
+      @media (max-width: 720px) {
+        .id-meta div:nth-child(n + 2) {
+          display: none;
+        }
+        .corner-label.tl {
+          display: none;
+        }
+      }
+      @media (max-height: 620px) {
+        .banner.bottom {
+          display: none;
+        }
+        .id-desc {
+          display: none;
+        }
+      }
+      @media (max-height: 520px) {
+        .stats-strip {
+          display: none;
+        }
+      }
+
+      /* ============== LOADER OVERLAY ============== */
+      #loader {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        background: var(--bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      #loader.hidden {
+        display: none;
+      }
+      .loader-card {
+        max-width: 640px;
+        width: 100%;
+        border: 1px solid var(--rule-2);
+        background: var(--surface);
+        padding: 28px 28px 24px;
+        font-family: var(--f-text);
+      }
+      .loader-card .crumb {
+        font-family: var(--f-mono);
+        font-size: 10px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 14px;
+      }
+      .loader-card h2 {
+        margin: 0 0 8px;
+        font-family: var(--f-mono);
+        font-weight: 300;
+        font-size: 22px;
+        letter-spacing: -0.01em;
+        color: var(--text);
+      }
+      .loader-card .lead {
+        margin: 0 0 18px;
+        font-size: 13px;
+        color: var(--soft);
+      }
+      .dropzone {
+        display: block;
+        border: 1px dashed var(--rule-3);
+        padding: 32px 18px;
+        text-align: center;
+        cursor: pointer;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+      .dropzone:hover,
+      .dropzone.over {
+        border-color: var(--text);
+        background: var(--surface-2);
+      }
+      .dropzone .arrow {
+        font-family: var(--f-mono);
+        font-size: 11px;
+        letter-spacing: 0.22em;
+        color: var(--soft);
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      }
+      .dropzone .label {
+        font-family: var(--f-mono);
+        font-size: 13px;
+        color: var(--text);
+        letter-spacing: -0.01em;
+      }
+      .dropzone .hint {
+        margin-top: 8px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .file-list {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+      .file-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        border: 1px solid var(--rule);
+        font-family: var(--f-mono);
+        font-size: 11px;
+        color: var(--soft);
+      }
+      .file-row .key {
+        color: var(--muted);
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        font-size: 10px;
+      }
+      .file-row.ok {
+        border-color: var(--rule-3);
+        color: var(--text);
+      }
+      .file-row.err {
+        border-color: var(--text);
+      }
+      .file-row .status {
+        font-family: var(--f-mono);
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+      .loader-error {
+        margin-top: 14px;
+        padding: 10px 12px;
+        border: 1px solid var(--text);
+        font-family: var(--f-mono);
+        font-size: 11px;
+        color: var(--text);
+        display: none;
+      }
+      .loader-error.on {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="loader" role="dialog" aria-label="Load threat model data">
+      <div class="loader-card">
+        <div class="crumb">// ATMT · THREAT MODEL VIEWER</div>
+        <h2>Load report data</h2>
+        <p class="lead">
+          Drop the three ATMT JSON files anywhere below, or click to browse.
+          Required: <code>ThreatModelDetails.json</code>,
+          <code>Layout.json</code>, <code>Threats.json</code>. Files are
+          auto-detected by shape — order and filename don't matter.
+        </p>
+        <div
+          class="dropzone"
+          id="dropzone"
+          tabindex="0"
+          role="button"
+          aria-label="Drop or browse JSON files"
+        >
+          <div class="arrow">▼ DROP · OR · BROWSE ▼</div>
+          <div class="label">Select / drop JSON files</div>
+          <div class="hint">
+            Nothing leaves your machine — parsing happens in-browser.
+          </div>
+        </div>
+        <input
+          type="file"
+          id="file-input"
+          accept=".json,application/json"
+          multiple
+          hidden
+        />
+        <div class="file-list" id="file-list">
+          <div class="file-row" data-slot="tmd">
+            <span
+              ><span class="key">TMD</span> &nbsp; ThreatModelDetails.json</span
+            ><span class="status">— pending</span>
+          </div>
+          <div class="file-row" data-slot="layout">
+            <span><span class="key">LAY</span> &nbsp; Layout.json</span
+            ><span class="status">— pending</span>
+          </div>
+          <div class="file-row" data-slot="threats">
+            <span><span class="key">THR</span> &nbsp; Threats.json</span
+            ><span class="status">— pending</span>
+          </div>
+        </div>
+        <div class="loader-error" id="loader-error"></div>
+      </div>
+    </div>
+
+    <div class="banner">
+      <span class="live">SIGNAL</span>
+      <span>// INTERN-SUPPORT</span>
+      <span class="dots"></span>
+      <span>ATMT · THREAT MODEL</span>
+      <span class="dots"></span>
+      <span id="banner-version">v1.0 //</span>
+    </div>
+
+    <header class="id">
+      <div class="id-top">
+        <h1 class="title" id="app-title">Threat <em>Model</em></h1>
+        <div class="id-meta">
+          <div><b>FILE</b><span id="file-no">SMI-001</span></div>
+          <div><b>BUILT</b><span id="file-date"></span></div>
+          <div><b>ANALYST</b><span>ATMT-AGENT</span></div>
+        </div>
+      </div>
+      <p class="id-desc" id="app-desc">—</p>
+      <div class="stats-strip" id="stats"></div>
+    </header>
+
+    <main>
+      <section id="diagram-wrap" aria-label="System diagram">
+        <div class="corner-label tl">
+          FIG.01 · DATA FLOW &amp; TRUST BOUNDARIES
+        </div>
+        <div class="corner-label bl" id="corner-bl">
+          SCROLL · ZOOM &nbsp;|&nbsp; DRAG · PAN
+        </div>
+        <svg
+          id="diagram"
+          xmlns="http://www.w3.org/2000/svg"
+          role="img"
+          aria-label="Threat model diagram"
+          preserveAspectRatio="xMidYMid meet"
+        ></svg>
+        <div class="hud" role="toolbar" aria-label="Zoom controls">
+          <button id="zoom-out" title="Zoom out">−</button>
+          <div class="zoom-val" id="zoom-val">100%</div>
+          <button id="zoom-reset" title="Fit">⌂</button>
+          <button id="zoom-in" title="Zoom in">+</button>
+        </div>
+      </section>
+
+      <aside class="folio" aria-label="Detail panels">
+        <nav class="folio-tabs" role="tablist">
+          <button
+            class="ftab active"
+            data-tab="selection"
+            role="tab"
+            aria-selected="true"
+          >
+            <span class="num">01</span>Selection
+          </button>
+          <button
+            class="ftab"
+            data-tab="components"
+            role="tab"
+            aria-selected="false"
+          >
+            <span class="num">02</span>Subjects
+          </button>
+          <button
+            class="ftab"
+            data-tab="interactions"
+            role="tab"
+            aria-selected="false"
+          >
+            <span class="num">03</span>Transmissions
+          </button>
+          <button
+            class="ftab"
+            data-tab="threats"
+            role="tab"
+            aria-selected="false"
+          >
+            <span class="num">04</span>Threats
+          </button>
+        </nav>
+        <div class="pane active" id="pane-selection" role="tabpanel">
+          <div class="empty">
+            <span class="arrow">[ &nbsp;↖ &nbsp;↘ &nbsp;← &nbsp;→ &nbsp;]</span>
+            Select any node or edge in the diagram to inspect.
+          </div>
+        </div>
+        <div class="pane" id="pane-components" role="tabpanel"></div>
+        <div class="pane" id="pane-interactions" role="tabpanel"></div>
+        <div class="pane" id="pane-threats" role="tabpanel"></div>
+      </aside>
+    </main>
+
+    <div class="banner bottom">
+      <span>// END</span>
+      <span class="dots"></span>
+      <span id="footer-meta">—</span>
+      <span class="dots"></span>
+      <span>RESTRICTED //</span>
+    </div>
+
+    <script>
+      const SVG_NS = "http://www.w3.org/2000/svg";
+
+      // ============== UTIL (needed by loader + init) ==============
+      function esc(s) {
+        return String(s).replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      }
+
+      // ============== LOADER ==============
+      // Auto-detect which kind of file each parsed JSON blob is.
+      function detectKind(data) {
+        if (Array.isArray(data)) {
+          if (data.length && data[0] && typeof data[0] === "object") {
+            const first = data[0];
+            if (first.Nodes && first.Edges) return "layout";
+            if ("severity" in first && "title" in first) return "threats";
+          }
+          // Empty array — best-effort: assume threats
+          return data.length === 0 ? "threats" : null;
+        }
+        if (data && typeof data === "object") {
+          if (
+            Array.isArray(data.Components) &&
+            Array.isArray(data.Interactions)
+          )
+            return "tmd";
+          if (data.Nodes && data.Edges) return "layout"; // unwrapped layout
+        }
+        return null;
+      }
+
+      // Normalize layout: file is array-wrapped, but accept bare too.
+      function unwrapLayout(raw) {
+        return Array.isArray(raw) ? raw[0] : raw;
+      }
+
+      const SLOT_LABEL = {
+        tmd: "ThreatModelDetails.json",
+        layout: "Layout.json",
+        threats: "Threats.json",
+      };
+      const loaded = { tmd: null, layout: null, threats: null };
+
+      function setSlotStatus(slot, status, ok) {
+        const row = document.querySelector(`.file-row[data-slot="${slot}"]`);
+        if (!row) return;
+        row.classList.remove("ok", "err");
+        if (ok === true) row.classList.add("ok");
+        if (ok === false) row.classList.add("err");
+        row.querySelector(".status").textContent = status;
+      }
+
+      function showLoaderError(msg) {
+        const e = document.getElementById("loader-error");
+        e.textContent = msg;
+        e.classList.add("on");
+      }
+      function clearLoaderError() {
+        const e = document.getElementById("loader-error");
+        e.classList.remove("on");
+        e.textContent = "";
+      }
+
+      function tryStart() {
+        if (loaded.tmd && loaded.layout && loaded.threats) {
+          document.getElementById("loader").classList.add("hidden");
+          init(loaded.tmd, unwrapLayout(loaded.layout), loaded.threats);
+        }
+      }
+
+      function ingestParsed(data, sourceName) {
+        const kind = detectKind(data);
+        if (!kind) {
+          showLoaderError(
+            `Unrecognized JSON shape in "${sourceName}". Expected ThreatModelDetails / Layout / Threats.`,
+          );
+          return false;
+        }
+        loaded[kind] = data;
+        setSlotStatus(kind, `✓ loaded · ${sourceName}`, true);
+        clearLoaderError();
+        tryStart();
+        return true;
+      }
+
+      function ingestFiles(fileList) {
+        Array.from(fileList).forEach((f) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            try {
+              const data = JSON.parse(reader.result);
+              ingestParsed(data, f.name);
+            } catch (err) {
+              showLoaderError(`Failed to parse "${f.name}": ${err.message}`);
+            }
+          };
+          reader.onerror = () =>
+            showLoaderError(`Failed to read "${f.name}": ${reader.error}`);
+          reader.readAsText(f);
+        });
+      }
+
+      // Drag & drop + file picker wiring
+      (function wireLoader() {
+        const dz = document.getElementById("dropzone");
+        const input = document.getElementById("file-input");
+        dz.addEventListener("click", () => input.click());
+        dz.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter" || ev.key === " ") {
+            ev.preventDefault();
+            input.click();
+          }
+        });
+        input.addEventListener("change", () => {
+          if (input.files && input.files.length) ingestFiles(input.files);
+        });
+        ["dragenter", "dragover"].forEach((evt) =>
+          dz.addEventListener(evt, (ev) => {
+            ev.preventDefault();
+            dz.classList.add("over");
+          }),
+        );
+        ["dragleave", "drop"].forEach((evt) =>
+          dz.addEventListener(evt, (ev) => {
+            ev.preventDefault();
+            dz.classList.remove("over");
+          }),
+        );
+        dz.addEventListener("drop", (ev) => {
+          if (ev.dataTransfer && ev.dataTransfer.files.length)
+            ingestFiles(ev.dataTransfer.files);
+        });
+        // Allow window-wide drop too, for convenience
+        window.addEventListener("dragover", (ev) => ev.preventDefault());
+        window.addEventListener("drop", (ev) => {
+          ev.preventDefault();
+          if (
+            ev.dataTransfer &&
+            ev.dataTransfer.files.length &&
+            !document.getElementById("loader").classList.contains("hidden")
+          )
+            ingestFiles(ev.dataTransfer.files);
+        });
+      })();
+
+      // Try sibling-file fetch first (works when served over HTTP). Silently
+      // falls back to the dropzone if blocked (file:// CORS) or 404.
+      (async function tryAutoFetch() {
+        const files = [
+          ["tmd", "ThreatModelDetails.json"],
+          ["layout", "Layout.json"],
+          ["threats", "Threats.json"],
+        ];
+        let anyOk = false;
+        await Promise.all(
+          files.map(async ([slot, name]) => {
+            try {
+              const r = await fetch(name, { cache: "no-store" });
+              if (!r.ok) throw new Error(`HTTP ${r.status}`);
+              const data = await r.json();
+              const kind = detectKind(data);
+              if (kind && kind === slot) {
+                loaded[slot] = data;
+                setSlotStatus(slot, `✓ auto · ${name}`, true);
+                anyOk = true;
+              }
+            } catch (_) {
+              /* expected on file:// or when files are missing */
+            }
+          }),
+        );
+        if (anyOk) tryStart();
+      })();
+
+      // ============== INIT (renders everything once data is loaded) ==============
+      function init(TMD, LAYOUT, THREATS) {
+        // ============== HEADER ==============
+        document.getElementById("app-title").innerHTML = esc(
+          TMD.Name || "",
+        ).replace(/\s+(\S+)$/, " <em>$1</em>");
+        document.getElementById("app-desc").textContent = TMD.Description;
+        document.getElementById("file-date").textContent = new Date()
+          .toISOString()
+          .slice(0, 10);
+        document.getElementById("banner-version").textContent =
+          `v${TMD.Version} //`;
+
+        const sevHigh = THREATS.filter((t) => t.severity === "high").length;
+        const sevMed = THREATS.filter((t) => t.severity === "med").length;
+        const sevLow = THREATS.filter((t) => t.severity === "low").length;
+        const stats = [
+          ["Subjects", TMD.Components.length],
+          ["Trans", TMD.Interactions.length],
+          ["Boundaries", TMD.TrustBoundaries.length],
+          ["Threats", THREATS.length],
+        ];
+        document.getElementById("stats").innerHTML =
+          stats
+            .map(
+              ([k, v]) =>
+                `<div class="stat"><span class="k">${esc(k)}</span><span class="v">${esc(String(v))}</span></div>`,
+            )
+            .join("") +
+          `<div class="stat severity"><span class="k">Severity</span>` +
+          `<span class="v"><b>${sevHigh}</b> H · <b>${sevMed}</b> M · <b>${sevLow}</b> L</span></div>`;
+        document.getElementById("footer-meta").textContent =
+          `${TMD.Components.length} SUBJECTS · ${TMD.Interactions.length} TRANSMISSIONS · ${THREATS.length} THREATS`;
+
+        // ============== UTIL ==============
+        function el(name, attrs, parent) {
+          const e = document.createElementNS(SVG_NS, name);
+          for (const k in attrs) e.setAttribute(k, attrs[k]);
+          if (parent) parent.appendChild(e);
+          return e;
+        }
+        function shortId(name) {
+          const cleaned = name
+            .replace(/[()]/g, "")
+            .replace(/[^A-Za-z0-9 ]/g, "");
+          const parts = cleaned.split(/\s+/).filter(Boolean);
+          if (parts.length === 1) return parts[0].slice(0, 5).toUpperCase();
+          return parts
+            .slice(0, 2)
+            .map((w) => w.slice(0, 3).toUpperCase())
+            .join("-");
+        }
+
+        // ============== DIAGRAM ==============
+        const svg = document.getElementById("diagram");
+        const PAD = 36;
+
+        // Compute base viewBox (content bounds)
+        let minX = Infinity,
+          minY = Infinity,
+          maxX = -Infinity,
+          maxY = -Infinity;
+        Object.values(LAYOUT.TrustBoundaries).forEach((tb) => {
+          minX = Math.min(minX, tb.Left);
+          minY = Math.min(minY, tb.Top);
+          maxX = Math.max(maxX, tb.Left + tb.Width);
+          maxY = Math.max(maxY, tb.Top + tb.Height);
+        });
+        Object.values(LAYOUT.Nodes).forEach((n) => {
+          minX = Math.min(minX, n.Left);
+          minY = Math.min(minY, n.Top);
+          maxX = Math.max(maxX, n.Left + n.Width);
+          maxY = Math.max(maxY, n.Top + n.Height);
+        });
+        const baseVB = {
+          x: minX - PAD,
+          y: minY - PAD,
+          w: maxX - minX + PAD * 2,
+          h: maxY - minY + PAD * 2,
+        };
+        let curVB = { ...baseVB };
+        function applyVB() {
+          svg.setAttribute(
+            "viewBox",
+            `${curVB.x} ${curVB.y} ${curVB.w} ${curVB.h}`,
+          );
+          const z = baseVB.w / curVB.w;
+          document.getElementById("zoom-val").textContent =
+            Math.round(z * 100) + "%";
+        }
+        applyVB();
+
+        // Defs: arrow markers
+        const defs = el("defs", {}, svg);
+        function makeArrow(id, cls) {
+          const m = el(
+            "marker",
+            {
+              id,
+              viewBox: "0 0 10 10",
+              refX: 9,
+              refY: 5,
+              markerWidth: 7,
+              markerHeight: 7,
+              orient: "auto-start-reverse",
+            },
+            defs,
+          );
+          el("path", { d: "M 0 0 L 10 5 L 0 10 z", class: cls }, m);
+        }
+        makeArrow("arrow", "edge-arrow");
+        makeArrow("arrow-hi", "edge-arrow hi");
+
+        const root = el("g", {}, svg);
+
+        // --- Trust boundaries ---
+        for (const [name, tb] of Object.entries(LAYOUT.TrustBoundaries)) {
+          el(
+            "rect",
+            {
+              x: tb.Left,
+              y: tb.Top,
+              width: tb.Width,
+              height: tb.Height,
+              rx: 0,
+              class: "tb-rect",
+            },
+            root,
+          );
+          // corner ticks
+          const T = 16;
+          const pts = [
+            [tb.Left, tb.Top, 1, 1],
+            [tb.Left + tb.Width, tb.Top, -1, 1],
+            [tb.Left, tb.Top + tb.Height, 1, -1],
+            [tb.Left + tb.Width, tb.Top + tb.Height, -1, -1],
+          ];
+          pts.forEach(([x, y, sx, sy]) => {
+            el(
+              "path",
+              {
+                d: `M ${x + sx * T} ${y} L ${x} ${y} L ${x} ${y + sy * T}`,
+                class: "tb-corner",
+              },
+              root,
+            );
+          });
+          // label tag (no fill color, just hairline border + mono caps)
+          const label = name.toUpperCase();
+          const tagW = label.length * 7 + 18;
+          el(
+            "rect",
+            {
+              x: tb.Left + 16,
+              y: tb.Top - 11,
+              width: tagW,
+              height: 22,
+              class: "tb-tag-bg",
+            },
+            root,
+          );
+          el(
+            "text",
+            {
+              x: tb.Left + 16 + 9,
+              y: tb.Top - 11 + 15,
+              class: "tb-tag",
+            },
+            root,
+          ).textContent = label;
+        }
+
+        // --- Edges ---
+        function portCoords(node, side) {
+          const cx = node.Left + node.Width / 2;
+          const cy = node.Top + node.Height / 2;
+          switch (side) {
+            case "North":
+              return { x: cx, y: node.Top };
+            case "South":
+              return { x: cx, y: node.Top + node.Height };
+            case "East":
+              return { x: node.Left + node.Width, y: cy };
+            case "West":
+              return { x: node.Left, y: cy };
+            default:
+              return { x: cx, y: cy };
+          }
+        }
+        const edgeGroups = [];
+        LAYOUT.Edges.forEach((e, i) => {
+          const s = LAYOUT.Nodes[e.Source];
+          const t = LAYOUT.Nodes[e.Target];
+          if (!s || !t) return;
+          const p1 = portCoords(s, e.PortSource);
+          const p2 = portCoords(t, e.PortTarget);
+          const mx = (p1.x + p2.x) / 2;
+          const my = (p1.y + p2.y) / 2;
+          const dx = p2.x - p1.x,
+            dy = p2.y - p1.y;
+          const len = Math.sqrt(dx * dx + dy * dy) || 1;
+          const nx = -dy / len,
+            ny = dx / len;
+          const curve = Math.min(50, len * 0.13);
+          const cx = mx + nx * curve,
+            cy = my + ny * curve;
+          const d = `M ${p1.x} ${p1.y} Q ${cx} ${cy} ${p2.x} ${p2.y}`;
+          const g = el("g", {}, root);
+          const hit = el(
+            "path",
+            {
+              d,
+              class: "edge-hit",
+              tabindex: 0,
+              role: "button",
+              "aria-label": `${e.Source} to ${e.Target}`,
+            },
+            g,
+          );
+          const line = el(
+            "path",
+            { d, class: "edge-line", "marker-end": "url(#arrow)" },
+            g,
+          );
+          // Animate stroke
+          const dash = len + 80;
+          line.style.strokeDasharray = dash;
+          line.style.strokeDashoffset = dash;
+          line.animate([{ strokeDashoffset: dash }, { strokeDashoffset: 0 }], {
+            duration: 850,
+            delay: 600 + i * 55,
+            fill: "forwards",
+            easing: "ease-out",
+          });
+          hit.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            selectEdge(i);
+          });
+          hit.addEventListener("keydown", (ev) => {
+            if (ev.key === "Enter" || ev.key === " ") {
+              ev.preventDefault();
+              selectEdge(i);
+            }
+          });
+          edgeGroups.push({ line, hit, source: e.Source, target: e.Target });
+        });
+
+        // --- Nodes ---
+        const nodeEls = {};
+        for (const [name, n] of Object.entries(LAYOUT.Nodes)) {
+          const g = el("g", { class: "node-g" }, root);
+          const card = el(
+            "rect",
+            {
+              x: n.Left,
+              y: n.Top,
+              width: n.Width,
+              height: n.Height,
+              rx: 0,
+              class: "node-card",
+              tabindex: 0,
+              role: "button",
+              "aria-label": name,
+            },
+            g,
+          );
+          // top thin strip for type
+          el(
+            "rect",
+            {
+              x: n.Left,
+              y: n.Top,
+              width: n.Width,
+              height: 14,
+              class: "node-strip",
+            },
+            g,
+          );
+          el(
+            "text",
+            {
+              x: n.Left + n.Width / 2,
+              y: n.Top + 10,
+              class: "node-strip-text",
+            },
+            g,
+          ).textContent = (n.Type || "process").toUpperCase();
+          // ID line
+          el(
+            "text",
+            {
+              x: n.Left + n.Width / 2,
+              y: n.Top + 30,
+              class: "node-id",
+            },
+            g,
+          ).textContent = "№ " + shortId(name);
+          // wrapped name
+          const nameText = el(
+            "text",
+            {
+              x: n.Left + n.Width / 2,
+              y: n.Top + 50,
+              class: "node-name",
+            },
+            g,
+          );
+          wrapTspans(nameText, name, n.Left + n.Width / 2, 12.5, n.Width - 8);
+          // crosshair corners
+          const ch = el("g", {}, g);
+          const T = 10,
+            M = 5;
+          const ext = [
+            [n.Left - M, n.Top - M, 1, 1],
+            [n.Left + n.Width + M, n.Top - M, -1, 1],
+            [n.Left - M, n.Top + n.Height + M, 1, -1],
+            [n.Left + n.Width + M, n.Top + n.Height + M, -1, -1],
+          ];
+          ext.forEach(([x, y, sx, sy]) => {
+            el(
+              "path",
+              {
+                d: `M ${x + sx * T} ${y} L ${x} ${y} L ${x} ${y + sy * T}`,
+                class: "crosshair",
+              },
+              ch,
+            );
+          });
+          card.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            selectNode(name);
+          });
+          card.addEventListener("keydown", (ev) => {
+            if (ev.key === "Enter" || ev.key === " ") {
+              ev.preventDefault();
+              selectNode(name);
+            }
+          });
+          nodeEls[name] = { card, ch, g };
+        }
+
+        function wrapTspans(textNode, str, x, lh, maxW) {
+          const charW = 6.4;
+          const maxChars = Math.max(8, Math.floor(maxW / charW));
+          const words = str.split(/\s+/);
+          const lines = [];
+          let cur = "";
+          for (const w of words) {
+            if ((cur + " " + w).trim().length > maxChars) {
+              if (cur) lines.push(cur);
+              cur = w;
+            } else cur = (cur + " " + w).trim();
+          }
+          if (cur) lines.push(cur);
+          const startDy = -((lines.length - 1) * lh) / 2;
+          lines.forEach((ln, i) => {
+            const ts = document.createElementNS(SVG_NS, "tspan");
+            ts.setAttribute("x", x);
+            ts.setAttribute("dy", i === 0 ? startDy : lh);
+            ts.textContent = ln;
+            textNode.appendChild(ts);
+          });
+        }
+
+        // ============== ZOOM + PAN ==============
+        const wrap = document.getElementById("diagram-wrap");
+
+        function clientToSvg(clientX, clientY) {
+          const rect = svg.getBoundingClientRect();
+          // Need to map within the actual rendered viewBox area (preserveAspectRatio meet)
+          const vbAR = curVB.w / curVB.h;
+          const elAR = rect.width / rect.height;
+          let renderW, renderH, offX, offY;
+          if (elAR > vbAR) {
+            renderH = rect.height;
+            renderW = renderH * vbAR;
+            offX = (rect.width - renderW) / 2;
+            offY = 0;
+          } else {
+            renderW = rect.width;
+            renderH = renderW / vbAR;
+            offX = 0;
+            offY = (rect.height - renderH) / 2;
+          }
+          const x = clientX - rect.left - offX;
+          const y = clientY - rect.top - offY;
+          return {
+            x: curVB.x + (x / renderW) * curVB.w,
+            y: curVB.y + (y / renderH) * curVB.h,
+            inside: x >= 0 && y >= 0 && x <= renderW && y <= renderH,
+          };
+        }
+
+        function zoomAt(factor, clientX, clientY) {
+          const p = clientToSvg(clientX, clientY);
+          const newW = curVB.w / factor;
+          const newH = curVB.h / factor;
+          // clamp
+          const maxZoomOut = 1.4; // can't zoom out more than 1.4x base
+          const maxZoomIn = 8;
+          const z = baseVB.w / newW;
+          if (z < 1 / maxZoomOut || z > maxZoomIn) return;
+          curVB.x = p.x - (p.x - curVB.x) / factor;
+          curVB.y = p.y - (p.y - curVB.y) / factor;
+          curVB.w = newW;
+          curVB.h = newH;
+          applyVB();
+        }
+
+        wrap.addEventListener(
+          "wheel",
+          (ev) => {
+            ev.preventDefault();
+            const factor = Math.exp(-ev.deltaY * 0.0015);
+            zoomAt(factor, ev.clientX, ev.clientY);
+          },
+          { passive: false },
+        );
+
+        let panning = false,
+          panStart = null,
+          vbStart = null;
+        wrap.addEventListener("mousedown", (ev) => {
+          // ignore if clicking interactive svg target
+          if (ev.target.closest(".node-card, .edge-hit, .hud")) return;
+          panning = true;
+          wrap.classList.add("dragging");
+          panStart = { x: ev.clientX, y: ev.clientY };
+          vbStart = { ...curVB };
+        });
+        window.addEventListener("mousemove", (ev) => {
+          if (!panning) return;
+          const rect = svg.getBoundingClientRect();
+          const scale = curVB.w / rect.width;
+          curVB.x = vbStart.x - (ev.clientX - panStart.x) * scale;
+          curVB.y = vbStart.y - (ev.clientY - panStart.y) * scale;
+          applyVB();
+        });
+        window.addEventListener("mouseup", () => {
+          panning = false;
+          wrap.classList.remove("dragging");
+        });
+
+        document.getElementById("zoom-in").addEventListener("click", () => {
+          const r = wrap.getBoundingClientRect();
+          zoomAt(1.25, r.left + r.width / 2, r.top + r.height / 2);
+        });
+        document.getElementById("zoom-out").addEventListener("click", () => {
+          const r = wrap.getBoundingClientRect();
+          zoomAt(1 / 1.25, r.left + r.width / 2, r.top + r.height / 2);
+        });
+        document.getElementById("zoom-reset").addEventListener("click", () => {
+          curVB = { ...baseVB };
+          applyVB();
+        });
+
+        // ============== TABS ==============
+        document.querySelectorAll(".ftab").forEach((tab) => {
+          tab.addEventListener("click", () => activateTab(tab.dataset.tab));
+          tab.addEventListener("keydown", (ev) => {
+            if (ev.key === "Enter" || ev.key === " ") {
+              ev.preventDefault();
+              activateTab(tab.dataset.tab);
+            }
+          });
+        });
+        function activateTab(name) {
+          document.querySelectorAll(".ftab").forEach((t) => {
+            const on = t.dataset.tab === name;
+            t.classList.toggle("active", on);
+            t.setAttribute("aria-selected", on ? "true" : "false");
+          });
+          document
+            .querySelectorAll(".pane")
+            .forEach((p) =>
+              p.classList.toggle("active", p.id === "pane-" + name),
+            );
+        }
+
+        // ============== SELECTION ==============
+        let activeThreat = null;
+
+        function clearThreatHighlight() {
+          activeThreat = null;
+          document.body.classList.remove("threat-mode");
+          Object.values(nodeEls).forEach(({ g }) =>
+            g.classList.remove("related", "dim"),
+          );
+          edgeGroups.forEach(({ line }) =>
+            line.classList.remove("related", "dim"),
+          );
+          document
+            .querySelectorAll(".memo.threat.active")
+            .forEach((m) => m.classList.remove("active"));
+        }
+
+        function clearSelection() {
+          Object.values(nodeEls).forEach(({ card, ch }) => {
+            card.classList.remove("selected");
+            ch.querySelectorAll(".crosshair").forEach((c) =>
+              c.classList.remove("on"),
+            );
+          });
+          edgeGroups.forEach(({ line }) => {
+            line.classList.remove("selected");
+            line.setAttribute("marker-end", "url(#arrow)");
+          });
+        }
+
+        function evidenceHTML(evs) {
+          if (!evs || !evs.length) return "";
+          const letters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+          return (
+            '<div class="exhibits">' +
+            evs
+              .map(
+                (e, i) =>
+                  `<div class="exhibit"><b>EXH·${letters[i] || "X"}·${esc(e.Source)}</b>${esc(e.Details)}</div>`,
+              )
+              .join("") +
+            "</div>"
+          );
+        }
+
+        function selectNode(name) {
+          clearThreatHighlight();
+          clearSelection();
+          const n = nodeEls[name];
+          n.card.classList.add("selected");
+          n.ch
+            .querySelectorAll(".crosshair")
+            .forEach((c) => c.classList.add("on"));
+          activateTab("selection");
+          const c = TMD.Components.find((c) => c.Name === name);
+          const pane = document.getElementById("pane-selection");
+          if (!c) {
+            pane.innerHTML = `<div class="empty">${esc(name)}</div>`;
+            return;
+          }
+          const incoming = TMD.Interactions.map((it, idx) => ({
+            it,
+            idx,
+          })).filter(({ it }) => it.TargetComponent === name);
+          const outgoing = TMD.Interactions.map((it, idx) => ({
+            it,
+            idx,
+          })).filter(({ it }) => it.SourceComponent === name);
+          pane.innerHTML = `
+    <div class="memo static">
+      <div class="label-row">
+        <span>SUBJECT · № ${esc(shortId(c.Name))}</span>
+        <span class="right">${esc(c.ProjectType || "—")}</span>
+      </div>
+      <h3 class="name">${esc(c.Name)}</h3>
+      <div class="chips">
+        <span class="chip strong">${esc(c.Type)}</span>
+        <span class="chip">${esc(c.TrustBoundary)}</span>
+      </div>
+      ${evidenceHTML(c.Evidences)}
+    </div>
+    ${
+      outgoing.length
+        ? `<h2>Outgoing<span class="count">${outgoing.length}</span></h2>` +
+          outgoing.map(({ it, idx }) => renderInteractionMemo(it, idx)).join("")
+        : ""
+    }
+    ${
+      incoming.length
+        ? `<h2>Incoming<span class="count">${incoming.length}</span></h2>` +
+          incoming.map(({ it, idx }) => renderInteractionMemo(it, idx)).join("")
+        : ""
+    }
+  `;
+        }
+
+        function selectEdge(i) {
+          clearThreatHighlight();
+          clearSelection();
+          const { line } = edgeGroups[i];
+          line.classList.add("selected");
+          line.setAttribute("marker-end", "url(#arrow-hi)");
+          activateTab("selection");
+          const it = TMD.Interactions[i];
+          const auth =
+            (it.InteractionDetails.match(/Auth:\s*([^|]+)$/) || [])[1] || "—";
+          document.getElementById("pane-selection").innerHTML = `
+    <div class="memo static">
+      <div class="label-row">
+        <span>TRANS · № ${String(i + 1).padStart(3, "0")}</span>
+        <span class="right">${esc(auth.trim())}</span>
+      </div>
+      <h3 class="name">${esc(it.SourceComponent)} <span class="arrow">→</span> ${esc(it.TargetComponent)}</h3>
+      <div class="body">${esc(it.InteractionDetails)}</div>
+      ${evidenceHTML(it.Evidences)}
+    </div>
+  `;
+        }
+
+        function renderInteractionMemo(it, idx) {
+          return `
+    <div class="memo" onclick="selectEdge(${idx})" tabindex="0"
+         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectEdge(${idx})}">
+      <div class="label-row">
+        <span>TRANS · № ${String(idx + 1).padStart(3, "0")}</span>
+      </div>
+      <h3 class="name">${esc(it.SourceComponent)} <span class="arrow">→</span> ${esc(it.TargetComponent)}</h3>
+      <div class="body">${esc(it.InteractionDetails)}</div>
+    </div>
+  `;
+        }
+
+        // ============== LIST PANES ==============
+        document.getElementById("pane-components").innerHTML =
+          `<h2>Subjects of investigation<span class="count">${TMD.Components.length}</span></h2>` +
+          TMD.Components.map(
+            (c, i) => `
+    <div class="memo" style="animation-delay:${i * 30}ms"
+         onclick="selectNode('${esc(c.Name).replace(/'/g, "\\'")}')" tabindex="0"
+         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectNode('${esc(c.Name).replace(/'/g, "\\'")}')}">
+      <div class="label-row">
+        <span>SUBJECT · № ${esc(shortId(c.Name))}</span>
+        <span class="right">${esc(c.ProjectType || "—")}</span>
+      </div>
+      <h3 class="name">${esc(c.Name)}</h3>
+      <div class="chips">
+        <span class="chip strong">${esc(c.Type)}</span>
+        <span class="chip">${esc(c.TrustBoundary)}</span>
+      </div>
+      ${c.Evidences && c.Evidences[0] ? `<div class="body" style="margin-top:8px">${esc(c.Evidences[0].Details)}</div>` : ""}
+    </div>`,
+          ).join("");
+
+        document.getElementById("pane-interactions").innerHTML =
+          `<h2>Intercepted transmissions<span class="count">${TMD.Interactions.length}</span></h2>` +
+          TMD.Interactions.map(
+            (it, i) => `
+    <div class="memo" style="animation-delay:${i * 30}ms"
+         onclick="selectEdge(${i})" tabindex="0"
+         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectEdge(${i})}">
+      <div class="label-row">
+        <span>TRANS · № ${String(i + 1).padStart(3, "0")}</span>
+      </div>
+      <h3 class="name">${esc(it.SourceComponent)} <span class="arrow">→</span> ${esc(it.TargetComponent)}</h3>
+      <div class="body">${esc(it.InteractionDetails)}</div>
+    </div>`,
+          ).join("");
+
+        const sevOrder = { high: 0, med: 1, low: 2 };
+        const sortedThreats = [...THREATS].sort(
+          (a, b) => sevOrder[a.severity] - sevOrder[b.severity],
+        );
+        const componentNames = new Set(TMD.Components.map((c) => c.Name));
+        document.getElementById("pane-threats").innerHTML =
+          `<h2>Identified threats<span class="count">${THREATS.length}</span></h2>` +
+          sortedThreats
+            .map(
+              (t, i) => `
+    <div class="memo threat" data-threat-idx="${i}" style="animation-delay:${i * 30}ms"
+         onclick="selectThreat(${i})" tabindex="0"
+         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectThreat(${i})}">
+      <div class="label-row">
+        <span>FINDING · № ${String(i + 1).padStart(3, "0")}</span>
+        <span class="sev ${t.severity}">${t.severity}</span>
+      </div>
+      <h3 class="name">${esc(t.title)}</h3>
+      <div class="body">${esc(t.description)}</div>
+      ${
+        t.components && t.components.length
+          ? `<div class="chips">${t.components
+              .map((c) => {
+                const matched = componentNames.has(c);
+                const cls = "chip" + (matched ? "" : " unmatched");
+                const handler = matched
+                  ? `onclick="event.stopPropagation();selectNode('${esc(c).replace(/'/g, "\\'")}')"`
+                  : "";
+                return `<span class="${cls}" ${handler}>${esc(c)}</span>`;
+              })
+              .join("")}</div>`
+          : ""
+      }
+    </div>`,
+            )
+            .join("");
+
+        function selectThreat(i) {
+          const t = sortedThreats[i];
+          if (!t) return;
+          const memo = document.querySelector(
+            `.memo.threat[data-threat-idx="${i}"]`,
+          );
+          // Toggle off if clicking the active one
+          if (activeThreat === i) {
+            clearThreatHighlight();
+            return;
+          }
+          clearSelection();
+          clearThreatHighlight();
+          activeThreat = i;
+          document.body.classList.add("threat-mode");
+          if (memo) memo.classList.add("active");
+
+          const related = new Set(
+            (t.components || []).filter((c) => componentNames.has(c)),
+          );
+          Object.entries(nodeEls).forEach(([name, { g }]) => {
+            if (related.has(name)) g.classList.add("related");
+            else g.classList.add("dim");
+          });
+          edgeGroups.forEach(({ line, source, target }) => {
+            if (related.has(source) && related.has(target))
+              line.classList.add("related");
+            else line.classList.add("dim");
+          });
+          activateTab("threats");
+        }
+
+        window.selectNode = selectNode;
+        window.selectEdge = selectEdge;
+        window.selectThreat = selectThreat;
+      } // end init()
+    </script>
+  </body>
+</html>

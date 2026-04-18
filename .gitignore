@@ -1,1 +1,4 @@
-ATMT_Output
+ATMT_Output/*
+!ATMT_Output/threat_model.html
+!ATMT_Output/README.md
+!ATMT_Output/example_threat_model_ui.png
